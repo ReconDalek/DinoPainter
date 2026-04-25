@@ -342,7 +342,7 @@ function autoResizeTextarea(el) {
 function copyCommand() {
   const textarea = document.getElementById("adminCommand");
   textarea.select();
-  document.execCommand("copy");
+  navigator.clipboard.writeText(text);
   showTooltip();
 }
 
@@ -370,7 +370,7 @@ function fallbackCopy(text) {
   textarea.select();
 
   try {
-    document.execCommand("copy");
+    navigator.clipboard.writeText(text);
     showTooltip("Link copied!");
   } catch (err) {
     showTooltip("Copy failed");
@@ -462,8 +462,22 @@ function smartRandomize() {
 
 async function generate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (!baseImage.complete) await new Promise(res => baseImage.onload = res);
-  await Promise.all(Object.values(masks).map(img => img.complete ? Promise.resolve() : new Promise(res => img.onload = res)));
+  if (!baseImage.complete) {
+  await new Promise((res, rej) => {
+    baseImage.onload = res;
+    baseImage.onerror = rej;
+  }).catch(() => {
+    drawErrorPlaceholder("Base image failed to load");
+    return;
+  });
+}
+  await Promise.all(Object.values(masks).map(img => {
+  if (img.complete) return Promise.resolve();
+  return new Promise((res) => {
+    img.onload = res;
+    img.onerror = res; // prevent freeze
+  });
+}));
 
   drawCentered(baseImage, baseImage.width, baseImage.height);
 
