@@ -15,6 +15,37 @@ let regionState = {};
 let selectedDinoKey = Object.keys(DINOS)[0]; 
 let commandMode = "simple"; 
 
+// --- Community Ads ---
+
+const ADS = [
+  {
+    name: "Xavii ASA",
+    image: "ads/Xavii_ASA.png",
+    link: "https://discord.gg/example1"
+  },
+  {
+    name: "TGP ASA",
+    image: "ads/TGP_ASA.gif",
+    link: "https://discord.gg/4tpdPKBuHE"
+  }
+];
+
+function loadAdBanner() {
+  if (!ADS.length) return;
+
+  const ad = ADS[Math.floor(Math.random() * ADS.length)];
+
+  const banner = document.getElementById("adBanner");
+  const img = document.getElementById("adImage");
+  const link = document.getElementById("adLink");
+
+  img.src = ad.image;
+  img.alt = ad.name;
+  link.href = ad.link;
+
+  banner.classList.remove("hidden");
+}
+
 // --- Searchable Dino Dropdown Logic ---
 
 function renderDinoList(filter = "") {
