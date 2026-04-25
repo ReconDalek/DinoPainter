@@ -15,25 +15,15 @@ let regionState = {};
 let selectedDinoKey = Object.keys(DINOS)[0]; 
 let commandMode = "simple"; 
 
-// --- Community Ads ---
+// --- Community Ads System ---
 
-const ADS = [
-  {
-    name: "Xavii ASA",
-    image: "ads/Xavii_ASA.png",
-    link: "https://discord.gg/example1"
-  },
-  {
-    name: "TGP ASA",
-    image: "ads/TGP_ASA.gif",
-    link: "https://discord.gg/4tpdPKBuHE"
-  }
-];
+let currentAd = null;
 
 function loadAdBanner() {
   if (!ADS.length) return;
 
   const ad = ADS[Math.floor(Math.random() * ADS.length)];
+  currentAd = ad;
 
   const banner = document.getElementById("adBanner");
   const img = document.getElementById("adImage");
@@ -43,10 +33,43 @@ function loadAdBanner() {
   img.alt = ad.name;
   link.href = ad.link;
 
-  banner.classList.remove("hidden");
+  trackImpression(ad.id);
+
   link.onclick = () => {
-  console.log("Ad clicked:", ad.name);
-};
+    trackClick(ad.id);
+  };
+
+  banner.classList.remove("hidden");
+}
+
+// --- Tracking (local for now) ---
+
+function trackImpression(adId) {
+  const stats = JSON.parse(localStorage.getItem("adStats") || "{}");
+
+  if (!stats[adId]) {
+    stats[adId] = { impressions: 0, clicks: 0 };
+  }
+
+  stats[adId].impressions++;
+
+  localStorage.setItem("adStats", JSON.stringify(stats));
+}
+
+function trackClick(adId) {
+  const stats = JSON.parse(localStorage.getItem("adStats") || "{}");
+
+  if (!stats[adId]) {
+    stats[adId] = { impressions: 0, clicks: 0 };
+  }
+
+  stats[adId].clicks++;
+
+  localStorage.setItem("adStats", JSON.stringify(stats));
+}
+
+function openAdForm() {
+  window.open("https://forms.gle/YOUR_FORM_LINK", "_blank");
 }
 
 // --- Searchable Dino Dropdown Logic ---
