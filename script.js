@@ -44,6 +44,9 @@ function loadAdBanner() {
   link.href = ad.link;
 
   banner.classList.remove("hidden");
+  link.onclick = () => {
+  console.log("Ad clicked:", ad.name);
+};
 }
 
 // --- Searchable Dino Dropdown Logic ---
@@ -158,6 +161,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   dinoInput.value = DINOS[firstKey].name;
   loadDino();
+
+  loadAdBanner(); 
 });
 
 document.getElementById("modeSimple").onclick = () => {
