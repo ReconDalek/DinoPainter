@@ -20,7 +20,10 @@ let commandMode = "simple";
 let currentAd = null;
 
 function loadAdBanner() {
-  if (!ADS.length) return;
+  if (typeof ADS === "undefined" || !ADS.length) {
+    console.warn("ADS not loaded");
+    return;
+  }
 
   const ad = ADS[Math.floor(Math.random() * ADS.length)];
   currentAd = ad;
