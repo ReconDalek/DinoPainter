@@ -245,3 +245,26 @@ button:hover {
     flex-direction: column;
   }
 }
+
+.ad-banner {
+  width: 100%;
+  max-width: 700px;
+  margin: 10px auto 20px auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1e293b;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.ad-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 120px; /* keeps it non-intrusive */
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.ad-banner:hover {
+  filter: brightness(1.1);
+}
