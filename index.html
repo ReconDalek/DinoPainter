@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ARK Dino Painter</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<div class="app">
+
+  <h1>ARK Dino Painter</h1>
+
+  <!-- Dino Select -->
+  <div class="card">
+  <headerlabel>Select Dino</headerlabel>
+  <div class="searchable-dropdown">
+    <input type="text" id="dinoInput" placeholder="Type to search..." autocomplete="off">
+    <div id="dinoList" class="dropdown-content hidden"></div>
+  </div>
+</div>
+
+  <!-- Regions -->
+<div class="card">
+  <headerlabel>Regions</headerlabel>
+  <div id="regions" class="regions-grid"></div>
+  <div class="button-row">
+  <div class="preset-container">
+    <div id="presetSelectFake" class="preset-display">Presets ▼</div>
+    <div id="presetDropdown" class="preset-dropdown hidden"></div>
+  </div>
+  <button onclick="randomizeColors()">🎲 Randomize</button>
+  <button onclick="smartRandomize()">🧠 Smart Randomize</button>
+</div>
+<div class="button-row">
+  <button id="resetPreset">⟲ Reset</button>
+  <button onclick="copyShareLink()">🔗 Share</button>
+</div>
+
+</div>
+
+  <!-- Canvas -->
+  <div class="card canvas-card">
+    <canvas id="canvas" width="512" height="512"></canvas>
+  </div>
+
+  <!-- Admin -->
+  <div class="card">
+  <headerlabel>Admin Command</headerlabel>
+
+    <div class="button-row">
+      <button id="modeSimple">Colour Command</button>
+      <button id="modeFull">Spawn Command</button>
+      <button onclick="copyCommand()">📋 Copy</button>
+    </div>
+
+    <div class="admin-row">
+      <textarea id="adminCommand" readonly></textarea>
+    </div>
+  </div>
+
+</div>
+
+<script src="data/colors.js"></script>
+<script src="data/dinos.js"></script>
+<script src="data/presets.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
