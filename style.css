@@ -66,9 +66,49 @@ canvas {
   background: black;
 }
 
-.admin-row {
-  display: flex;
+/* wrapper controls positioning */
+.admin-wrapper {
+  position: relative;
   width: 100%;
+}
+
+/* make textarea the base layer */
+.admin-wrapper textarea {
+  width: 100%;
+  padding: 10px 44px 10px 10px; /* space for button */
+  resize: none;
+  border-radius: 6px;
+  border: none;
+  box-sizing: border-box;
+  display: block; /* important */
+}
+
+/* overlay button */
+.copy-btn {
+  position: absolute;
+  top: 8px;              /* anchor to top instead of center (more stable) */
+  right: 8px;
+
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  opacity: 0.7;
+
+  padding: 4px 6px;
+  font-size: 14px;
+  border-radius: 6px;
+
+  min-width: unset;
+  line-height: 25px;
+
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.copy-btn:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+  opacity: 100;
 }
 
 textarea {
@@ -82,17 +122,47 @@ textarea {
 }
 
 button {
-  background: #3b82f6;
-  border: none;
-  padding: 12px;
-  font-size: 16px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  padding: 8px 14px;
+  font-size: 14px;
   border-radius: 8px;
   cursor: pointer;
-  color: white;
+  color: #e2e8f0;
+  transition: all 0.15s ease;
+  min-width: 90px;
+
+  font-weight: 500; /* slightly bold by default */
 }
 
 button:hover {
-  background: #2563eb;
+  background: #334155;
+  border-color: #475569;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* Slightly stronger actions */
+button.primary {
+  background: transparent;
+  border-color: #475569; 
+}
+
+/* Less important */
+button.subtle {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+}
+
+button.subtle:hover,
+button.primary:hover {
+  background: #334155;
+  color: #fff;
+  border-color: #64748b;
+  font-weight: 600;
 }
 
 #copyTooltip {
@@ -115,8 +185,8 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-top: 15px;
+  gap: 6px;
+  margin-top: 10px;
   flex-wrap: wrap;
 }
 
@@ -170,26 +240,23 @@ button:hover {
 
 
 .preset-display {
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
   border: 1px solid #334155;
   background: #1e293b;
-  color: #fff;
+  color: #e2e8f0;
   cursor: pointer;
   user-select: none;
-  min-width: 160px;
+  min-width: 120px;
   text-align: center;
   transition: all 0.15s ease;
 }
 
-
-/* hover effect */
 .preset-display:hover {
   background: #334155;
   border-color: #475569;
 }
 
-/* active click feel */
 .preset-display:active {
   transform: scale(0.97);
 }
@@ -249,17 +316,57 @@ button:hover {
 .ad-banner {
   padding: 0;
   overflow: hidden;
+  border-radius: 12px;
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 5 / 1; /* 👈 this now actually works */
+}
+
+.ad-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right,
+    rgba(15,23,42,0.6),
+    transparent 30%,
+    transparent 70%,
+    rgba(15,23,42,0.6)
+  );
+  pointer-events: none;
 }
 
 .ad-banner img {
   width: 100%;
-  height: auto;
-  max-height: 120px;
+  height: 100%;
+
   object-fit: cover;
+  object-position: center;
+
   display: block;
-  cursor: pointer;
 }
 
 .ad-banner:hover {
   filter: brightness(1.1);
+}
+
+.ad-cta {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0px;
+}
+
+.canvas-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dino-title {
+  width: 100%;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 10px;
 }

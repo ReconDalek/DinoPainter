@@ -29,43 +29,46 @@
     <div id="presetSelectFake" class="preset-display">Presets ▼</div>
     <div id="presetDropdown" class="preset-dropdown hidden"></div>
   </div>
-  <button onclick="randomizeColors()">🎲 Randomize</button>
-  <button onclick="smartRandomize()">🧠 Smart Randomize</button>
+<button class="primary" onclick="randomizeColors()">🎲 Randomize</button>
+<button class="primary" onclick="smartRandomize()">🧠 Smart Randomize</button>
 </div>
 <div class="button-row">
-  <button id="resetPreset">⟲ Reset</button>
-  <button onclick="copyShareLink()">🔗 Share</button>
+<button class="subtle" id="resetPreset">⟲ Reset</button>
+<button class="subtle" onclick="copyShareLink()">🔗 Share</button>
 </div>
 
 </div>
 
   <!-- Canvas -->
   <div class="card canvas-card">
+    <div id="dinoTitle" class="dino-title"></div>
     <canvas id="canvas" width="512" height="512"></canvas>
   </div>
 
   <!-- Admin -->
   <div class="card">
-  <div class="headerlabel">Admin Command</div>
+    <div class="headerlabel">Admin Command</div>
+
+    <div class="admin-wrapper">
+      <textarea id="adminCommand" readonly></textarea>
+      <button class="copy-btn" onclick="copyCommand()">📋</button>
+    </div>
 
     <div class="button-row">
-      <button id="modeSimple">Colour Command</button>
-      <button id="modeFull">Spawn Command</button>
-      <button onclick="copyCommand()">📋 Copy</button>
-    </div>
-
-    <div class="admin-row">
-      <textarea id="adminCommand" readonly></textarea>
+      <button class="subtle" id="modeSimple">Colour Command</button>
+      <button class="subtle" id="modeFull">Spawn Command</button>
     </div>
   </div>
-  
-  <!-- Community Banner Ad -->
-   <button onclick="openAdForm()">📢 Advertise Your Server?</button>
-<div class="card ad-banner hidden" id="adBanner">
-  <a id="adLink" href="#" target="_blank" rel="noopener">
-    <img id="adImage" src="" alt="Server Advertisement">
-  </a>
-</div>
+</br>
+  <div class="ad-cta">
+    <button class="subtle" onclick="openAdForm()">📢 Advertise Your Server?</button>
+  </div>
+
+  <div class="card ad-banner hidden" id="adBanner">
+    <a id="adLink" href="#" target="_blank" rel="noopener">
+      <img id="adImage" src="" alt="Server Advertisement">
+    </a>
+  </div>
 
 </div>
 

@@ -91,7 +91,7 @@ function renderDinoList(filter = "") {
     div.textContent = DINOS[key].name;
     
     div.addEventListener("click", () => {
-      dinoInput.value = DINOS[key].name;
+      //dinoInput.value = DINOS[key].name;
       selectedDinoKey = key; 
       dinoList.classList.add("hidden");
       loadDino(); 
@@ -156,7 +156,7 @@ resetBtn.addEventListener("click", () => {
   presetDisplay.style.background = "#1e293b";
   presetDisplay.style.color = "#fff";
 
-  dinoInput.value = currentDino.name; 
+  //dinoInput.value = currentDino.name; 
   regionState = {}; 
   loadDino(); 
 });
@@ -185,10 +185,11 @@ window.addEventListener("DOMContentLoaded", () => {
   const firstKey = selectedDinoKey || Object.keys(DINOS)[0];
   selectedDinoKey = firstKey;
 
-  dinoInput.value = DINOS[firstKey].name;
+  //dinoInput.value = DINOS[firstKey].name;
+
   loadDino();
 
-  loadAdBanner(); 
+  loadAdBanner();
 });
 
 document.getElementById("modeSimple").onclick = () => {
@@ -204,6 +205,8 @@ document.getElementById("modeFull").onclick = () => {
 function loadDino() {
   const key = selectedDinoKey; 
   currentDino = DINOS[key];
+
+  document.getElementById("dinoTitle").textContent = currentDino.name;
 
   masks = {};
   document.getElementById("regions").innerHTML = "";
@@ -375,25 +378,30 @@ function updateAdminCommand() {
     if (!select || select.value === "unchanged") return;
 
     const colorId = select.options[select.selectedIndex].dataset.id;
-    commands.push(`cheat setTargetDinoColor ${region} ${colorId}`);
+    commands.push(`setTargetDinoColor ${region} ${colorId}`);
   });
 
   let output = "";
 
   if (commandMode === "simple") {
-    output = commands.join(" | ");
+    if (commands.length > 0) {
+      output = `cheat ${commands.join(" | ")}`;
+    }
   } else {
-    // FULL SPAWN VERSION
     const spawn = currentDino.path
-  ? `cheat gmsummon "${currentDino.path}" 150`
-  : "cheat gmsummon \"<missing_path>\" 150";
-    output = [spawn, ...commands].join(" | ");
+      ? `cheat gmsummon "${currentDino.path}" 150`
+      : `cheat gmsummon "<missing_path>" 150`;
+
+    const colorCommands = commands.length
+      ? `${commands.join(" | ")}`
+      : "";
+
+    output = colorCommands ? `${spawn} | ${colorCommands}` : spawn;
   }
 
-  document.getElementById("adminCommand").value = output;
   const textarea = document.getElementById("adminCommand");
-    textarea.value = output;
-    autoResizeTextarea(textarea);
+  textarea.value = output;
+  autoResizeTextarea(textarea);
 }
 
 function autoResizeTextarea(el) {
@@ -401,12 +409,6 @@ function autoResizeTextarea(el) {
   el.style.height = el.scrollHeight + "px";
 }
 
-function copyCommand() {
-  const textarea = document.getElementById("adminCommand");
-  textarea.select();
-  navigator.clipboard.writeText(text);
-  showTooltip();
-}
 
 function copyShareLink() {
   const url = window.location.href;
@@ -462,7 +464,7 @@ function loadFromURL() {
   const dino = params.get("dino");
   if (dino && DINOS[dino]) {
     selectedDinoKey = dino;
-    dinoInput.value = DINOS[dino].name;
+    //dinoInput.value = DINOS[dino].name;
   }
 
   regionState = {};
@@ -505,21 +507,72 @@ function randomizeColors() {
 }
 
 function smartRandomize() {
+  if (!currentDino) return;
+
+  // 1. pick a base colour from actual palette
   const base = COLORS[Math.floor(Math.random() * COLORS.length)];
   const baseRGB = hexToRgb(base.hex);
+
   currentDino.regions.forEach(region => {
     const select = document.getElementById(`region-${region}`);
-    const similar = COLORS.filter(c => {
+    if (!select) return;
+
+    // 2. find ONLY valid selectable colours (from COLORS list)
+    let similar = COLORS.filter(c => {
       const rgb = hexToRgb(c.hex);
-      return (Math.abs(rgb.r - baseRGB.r) + Math.abs(rgb.g - baseRGB.g) + Math.abs(rgb.b - baseRGB.b)) < 200;
+      const dist =
+        Math.abs(rgb.r - baseRGB.r) +
+        Math.abs(rgb.g - baseRGB.g) +
+        Math.abs(rgb.b - baseRGB.b);
+
+      return dist < 220; // slightly widened for better variety
     });
+
+    // fallback safety (VERY important)
+    if (similar.length === 0) {
+      similar = COLORS;
+    }
+
+    // 3. weighted-ish randomness (keeps it “smart but random”)
     const chosen = similar[Math.floor(Math.random() * similar.length)];
-    select.value = chosen.hex;
+
+    // 4. HARD FIX: ensure option exists in dropdown
+    const existsInSelect = [...select.options].some(opt => opt.value === chosen.hex);
+
+    if (existsInSelect) {
+      select.value = chosen.hex;
+    } else {
+      // fallback to first valid option (prevents silent failure)
+      select.value = select.options[0].value;
+    }
+
+    // 5. sync visuals
     select.style.backgroundColor = chosen.hex;
     select.style.color = getContrastColor(chosen.hex);
-    regionState[region] = chosen.hex;
+
+    // 6. sync state (source of truth for generate())
+    regionState[region] = select.value;
   });
-  generate();
+
+  // 7. ensure render uses updated state AFTER DOM sync
+  requestAnimationFrame(() => {
+    generate();
+  });
+}
+
+function hslToHex(h, s, l) {
+  s /= 100;
+  l /= 100;
+
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+
+  const f = n =>
+    Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+
+  return `#${[f(0), f(8), f(4)]
+    .map(x => x.toString(16).padStart(2, "0"))
+    .join("")}`;
 }
 
 async function generate() {
@@ -568,4 +621,38 @@ function drawErrorPlaceholder(text) {
   ctx.textAlign = "center";
 
   ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+}
+
+
+function copyCommand() {
+  const textarea = document.getElementById("adminCommand");
+  const button = document.querySelector(".copy-btn");
+
+  const text = textarea.value;
+
+  navigator.clipboard.writeText(text).then(() => {
+    // Save original state
+    const originalContent = button.innerHTML;
+
+    // Apply success state
+    button.innerHTML = "✔";
+    button.style.background = "#22c55e";
+    button.style.borderColor = "#22c55e";
+    button.style.color = "#052e16";
+    showTooltip();
+
+    // Reset after delay
+    setTimeout(() => {
+      button.innerHTML = originalContent;
+      button.style.background = "transparent";
+      button.style.borderColor = "#334155";
+      button.style.color = "#94a3b8";
+    }, 2000);
+  }).catch(() => {
+    // fallback visual if copy fails
+    button.innerHTML = "✖";
+    setTimeout(() => {
+      button.innerHTML = "📋";
+    }, 1500);
+  });
 }
