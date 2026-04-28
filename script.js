@@ -1,7 +1,6 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// UI Elements
 const presetDisplay = document.getElementById("presetSelectFake");
 const presetDropdown = document.getElementById("presetDropdown");
 const resetBtn = document.getElementById("resetPreset");
@@ -15,7 +14,6 @@ let regionState = {};
 let selectedDinoKey = Object.keys(DINOS)[0]; 
 let commandMode = "simple"; 
 
-// --- Community Ads System ---
 
 let currentAd = null;
 
@@ -36,6 +34,8 @@ function loadAdBanner() {
   img.alt = ad.name;
   link.href = ad.link;
 
+  link.title = ad.name;
+
   trackImpression(ad.id);
 
   link.onclick = () => {
@@ -45,7 +45,6 @@ function loadAdBanner() {
   banner.classList.remove("hidden");
 }
 
-// --- Tracking (local for now) ---
 
 function trackImpression(adId) {
   const stats = JSON.parse(localStorage.getItem("adStats") || "{}");
@@ -72,15 +71,14 @@ function trackClick(adId) {
 }
 
 function openAdForm() {
-  window.open("https://forms.gle/YOUR_FORM_LINK", "_blank");
+  window.open("https://forms.gle/Wgz5Qdb8Fx5ZpPYT6", "_blank");
 }
 
-// --- Searchable Dino Dropdown Logic ---
 
 function renderDinoList(filter = "") {
   dinoList.innerHTML = "";
   
-  // Filter the DINOS object keys based on the name property
+  
   const filteredKeys = Object.keys(DINOS).filter(key => 
     DINOS[key].name.toLowerCase().includes(filter.toLowerCase())
   );
@@ -101,14 +99,12 @@ function renderDinoList(filter = "") {
   });
 }
 
-// Search Event Listeners
 dinoInput.addEventListener("focus", () => renderDinoList(dinoInput.value));
 dinoInput.addEventListener("input", (e) => {
   renderDinoList(e.target.value);
   dinoList.classList.remove("hidden");
 });
 
-// Close when clicking outside
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".searchable-dropdown")) {
     dinoList.classList.add("hidden");
@@ -117,7 +113,6 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// --- Preset Logic ---
 
 for (let key in PRESETS) {
   const ids = PRESETS[key];
@@ -147,8 +142,24 @@ for (let key in PRESETS) {
   presetDropdown.appendChild(div);
 }
 
-presetDisplay.addEventListener("click", () => {
+presetDisplay.addEventListener("click", (e) => {
+  e.stopPropagation();
   presetDropdown.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  const clickedInsidePreset =
+    e.target.closest(".preset-container");
+
+  if (!clickedInsidePreset) {
+    presetDropdown.classList.add("hidden");
+  }
+
+  if (!e.target.closest(".searchable-dropdown")) {
+    dinoList.classList.add("hidden");
+  } else if (e.target === dinoInput) {
+    dinoList.classList.remove("hidden");
+  }
 });
 
 resetBtn.addEventListener("click", () => {
@@ -161,7 +172,6 @@ resetBtn.addEventListener("click", () => {
   loadDino(); 
 });
 
-// --- Core Functions ---
 
 function applyPresetById(presetName) {
   const preset = PRESETS[presetName];
@@ -248,7 +258,6 @@ function createRegionUI(region, isActive) {
   const select = document.createElement("select");
   select.id = `region-${region}`;
 
-  // --- Disabled region handling ---
   if (!isActive) {
     select.disabled = true;
 
@@ -257,11 +266,9 @@ function createRegionUI(region, isActive) {
     disabledOption.textContent = "Disabled";
     select.appendChild(disabledOption);
 
-    // Ensure no lingering state
     delete regionState[region];
 
   } else {
-    // Normal active region setup
     const defaultOption = document.createElement("option");
     defaultOption.value = "unchanged";
     defaultOption.textContent = "Unchanged";
@@ -295,8 +302,6 @@ function createRegionUI(region, isActive) {
   container.appendChild(select);
   document.getElementById("regions").appendChild(container);
 }
-
-// --- Helpers & Rendering ---
 
 function getContrastColor(hex) {
   const { r, g, b } = hexToRgb(hex);
@@ -353,10 +358,8 @@ function applyMask(maskImg, baseImg, color) {
 }
 
 function drawCentered(img, baseWidth, baseHeight) {
-  // Calculate scale to fit inside canvas
   const fitScale = Math.min(canvas.width / baseWidth, canvas.height / baseHeight);
 
-  // Prevent upscaling (this is the key fix)
   const scale = Math.min(1, fitScale);
 
   const drawWidth = img.width * scale;
@@ -509,7 +512,6 @@ function randomizeColors() {
 function smartRandomize() {
   if (!currentDino) return;
 
-  // 1. pick a base colour from actual palette
   const base = COLORS[Math.floor(Math.random() * COLORS.length)];
   const baseRGB = hexToRgb(base.hex);
 
@@ -517,7 +519,6 @@ function smartRandomize() {
     const select = document.getElementById(`region-${region}`);
     if (!select) return;
 
-    // 2. find ONLY valid selectable colours (from COLORS list)
     let similar = COLORS.filter(c => {
       const rgb = hexToRgb(c.hex);
       const dist =
@@ -525,36 +526,27 @@ function smartRandomize() {
         Math.abs(rgb.g - baseRGB.g) +
         Math.abs(rgb.b - baseRGB.b);
 
-      return dist < 220; // slightly widened for better variety
+      return dist < 220;
     });
 
-    // fallback safety (VERY important)
     if (similar.length === 0) {
       similar = COLORS;
     }
 
-    // 3. weighted-ish randomness (keeps it “smart but random”)
     const chosen = similar[Math.floor(Math.random() * similar.length)];
 
-    // 4. HARD FIX: ensure option exists in dropdown
     const existsInSelect = [...select.options].some(opt => opt.value === chosen.hex);
 
     if (existsInSelect) {
       select.value = chosen.hex;
     } else {
-      // fallback to first valid option (prevents silent failure)
       select.value = select.options[0].value;
     }
-
-    // 5. sync visuals
     select.style.backgroundColor = chosen.hex;
     select.style.color = getContrastColor(chosen.hex);
-
-    // 6. sync state (source of truth for generate())
     regionState[region] = select.value;
   });
 
-  // 7. ensure render uses updated state AFTER DOM sync
   requestAnimationFrame(() => {
     generate();
   });
@@ -590,7 +582,7 @@ async function generate() {
   if (img.complete) return Promise.resolve();
   return new Promise((res) => {
     img.onload = res;
-    img.onerror = res; // prevent freeze
+    img.onerror = res; 
   });
 }));
 
@@ -631,17 +623,14 @@ function copyCommand() {
   const text = textarea.value;
 
   navigator.clipboard.writeText(text).then(() => {
-    // Save original state
     const originalContent = button.innerHTML;
 
-    // Apply success state
     button.innerHTML = "✔";
     button.style.background = "#22c55e";
     button.style.borderColor = "#22c55e";
     button.style.color = "#052e16";
     showTooltip();
 
-    // Reset after delay
     setTimeout(() => {
       button.innerHTML = originalContent;
       button.style.background = "transparent";
@@ -649,7 +638,6 @@ function copyCommand() {
       button.style.color = "#94a3b8";
     }, 2000);
   }).catch(() => {
-    // fallback visual if copy fails
     button.innerHTML = "✖";
     setTimeout(() => {
       button.innerHTML = "📋";

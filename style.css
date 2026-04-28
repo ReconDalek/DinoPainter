@@ -66,27 +66,24 @@ canvas {
   background: black;
 }
 
-/* wrapper controls positioning */
 .admin-wrapper {
   position: relative;
   width: 100%;
 }
 
-/* make textarea the base layer */
 .admin-wrapper textarea {
   width: 100%;
-  padding: 10px 44px 10px 10px; /* space for button */
+  padding: 10px 44px 10px 10px; 
   resize: none;
   border-radius: 6px;
   border: none;
   box-sizing: border-box;
-  display: block; /* important */
+  display: block; 
 }
 
-/* overlay button */
 .copy-btn {
   position: absolute;
-  top: 8px;              /* anchor to top instead of center (more stable) */
+  top: 8px;
   right: 8px;
 
   background: transparent;
@@ -131,8 +128,10 @@ button {
   color: #e2e8f0;
   transition: all 0.15s ease;
   min-width: 90px;
-
-  font-weight: 500; /* slightly bold by default */
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 button:hover {
@@ -144,13 +143,11 @@ button:active {
   transform: scale(0.97);
 }
 
-/* Slightly stronger actions */
 button.primary {
   background: transparent;
   border-color: #475569; 
 }
 
-/* Less important */
 button.subtle {
   background: transparent;
   border: 1px solid #334155;
@@ -228,6 +225,7 @@ button.primary:hover {
   color: #fff;
   font-weight: bold;
   transition: background 0.15s ease;
+  min-width: 120px;
 }
 
 .preset-dropdown div:hover {
@@ -247,9 +245,17 @@ button.primary:hover {
   color: #e2e8f0;
   cursor: pointer;
   user-select: none;
-  min-width: 120px;
+
   text-align: center;
   transition: all 0.15s ease;
+
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .preset-display:hover {
@@ -279,7 +285,7 @@ button.primary:hover {
 .dropdown-content {
   position: absolute;
   width: 100%;
-  max-height: 300px; /* Makes it scrollable */
+  max-height: 300px; 
   overflow-y: auto;
   background: #1e293b;
   border: 1px solid #334155;
@@ -304,12 +310,39 @@ button.primary:hover {
 }
 
 @media (max-width: 600px) {
-  .regions-grid {
-    grid-template-columns: repeat(2, 1fr);
+  button .emoji {
+    display: none;
   }
 
+  .regions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 2fr);
+  gap: 10px;
+}
+
   .button-row {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .button-row button {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .preset-container {
+    flex-shrink: 0;
+  }
+
+  .preset-display {
+    min-width: 90px;
+    padding: 6px 8px;
+    font-size: 12px;
   }
 }
 
@@ -320,7 +353,7 @@ button.primary:hover {
   position: relative;
 
   width: 100%;
-  aspect-ratio: 5 / 1; /* 👈 this now actually works */
+  aspect-ratio: 4 / 1; 
 }
 
 .ad-banner::after {
