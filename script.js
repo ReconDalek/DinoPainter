@@ -568,6 +568,9 @@ function hslToHex(h, s, l) {
 }
 
 async function generate() {
+  if (window.AndroidBridge) {
+        AndroidBridge.onGenerateCalled();
+    }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!baseImage.complete) {
   await new Promise((res, rej) => {

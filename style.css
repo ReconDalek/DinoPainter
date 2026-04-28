@@ -236,11 +236,10 @@ button.primary:hover {
   display: none;
 }
 
-
 .preset-display {
   padding: 8px 14px;
   border-radius: 8px;
-  border: 1px solid #334155;
+  border: 1px solid #475569;
   background: #1e293b;
   color: #e2e8f0;
   cursor: pointer;
@@ -248,6 +247,10 @@ button.primary:hover {
 
   text-align: center;
   transition: all 0.15s ease;
+
+  display: inline-block;
+  line-height: normal;
+  font: inherit;
 
   flex: 1 1 0;
   min-width: 0;
@@ -261,6 +264,7 @@ button.primary:hover {
 .preset-display:hover {
   background: #334155;
   border-color: #475569;
+  font-weight: 600;
 }
 
 .preset-display:active {
@@ -309,43 +313,6 @@ button.primary:hover {
   display: none;
 }
 
-@media (max-width: 600px) {
-  button .emoji {
-    display: none;
-  }
-
-  .regions-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 2fr);
-  gap: 10px;
-}
-
-  .button-row {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    gap: 4px;
-  }
-
-  .button-row button {
-    flex: 1;
-    min-width: 0;
-    padding: 6px 8px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-
-  .preset-container {
-    flex-shrink: 0;
-  }
-
-  .preset-display {
-    min-width: 90px;
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-}
-
 .ad-banner {
   padding: 0;
   overflow: hidden;
@@ -386,7 +353,7 @@ button.primary:hover {
 .ad-cta {
   display: flex;
   justify-content: center;
-  margin-bottom: 0px;
+  margin-top: -15px;
 }
 
 .canvas-card {
@@ -402,4 +369,49 @@ button.primary:hover {
   font-weight: 600;
   color: #e2e8f0;
   margin-bottom: 10px;
+}
+
+.flip {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  button .emoji {
+    display: none;
+  }
+
+  .regions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 2fr);
+  gap: 10px;
+}
+
+  .button-row {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .button-row button {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .preset-container {
+    flex-shrink: 0;
+  }
+
+  .preset-display {
+    min-width: 90px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
 }
