@@ -415,3 +415,39 @@ button.primary:hover {
     font-size: 12px;
   }
 }
+
+.ad-rail {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 600px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+
+  display: none; /* hidden by default */
+  z-index: 5;
+}
+
+.ad-rail.left {
+  left: 10px;
+}
+
+.ad-rail.right {
+  right: 10px;
+}
+
+.ad-rail.loaded {
+  opacity: 1;
+}
+
+/* Only show on larger screens */
+@media (min-width: 1000px) {
+  .ad-rail {
+    display: block;
+  }
+
+  .app {
+    margin: 0 auto;
+  }
+}

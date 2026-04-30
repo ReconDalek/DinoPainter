@@ -14,30 +14,30 @@
 
   <!-- Dino Select -->
   <div class="card">
-  <div class="headerlabel">Select Dino</div>
-  <div class="searchable-dropdown">
-    <input type="text" id="dinoInput" placeholder="Type to search..." autocomplete="off">
-    <div id="dinoList" class="dropdown-content hidden"></div>
+    <div class="headerlabel">Select Dino</div>
+    <div class="searchable-dropdown">
+      <input type="text" id="dinoInput" placeholder="Type to search..." autocomplete="off">
+      <div id="dinoList" class="dropdown-content hidden"></div>
+    </div>
   </div>
-</div>
 
   <!-- Regions -->
-<div class="card">
-  <div class="headerlabel">Regions</div>
-  <div id="regions" class="regions-grid"></div>
-  <div class="button-row">
-<button class="primary" onclick="randomizeColors()"><span class="emoji">🎲 </span>Randomize</button>
-<button class="primary" onclick="smartRandomize()"><span class="emoji">🧠 </span>Smart Randomize</button>
-    <div class="preset-container">
-    <div id="presetSelectFake" class="preset-display">Presets ▼</div>
-    <div id="presetDropdown" class="preset-dropdown hidden"></div>
+  <div class="card">
+    <div class="headerlabel">Regions</div>
+    <div id="regions" class="regions-grid"></div>
+    <div class="button-row">
+    <button class="primary" onclick="randomizeColors()"><span class="emoji">🎲 </span>Randomize</button>
+    <button class="primary" onclick="smartRandomize()"><span class="emoji">🧠 </span>Smart Randomize</button>
+      <div class="preset-container">
+      <div id="presetSelectFake" class="preset-display">Presets ▼</div>
+      <div id="presetDropdown" class="preset-dropdown hidden"></div>
+    </div>
+    </div>
+    <div class="button-row">
+    <button class="subtle" id="resetPreset"><span class="emoji">⟲ </span>Reset</button>
+    <button class="subtle" onclick="copyShareLink()"><span class="emoji">🔗 </span>Share</button>
+    </div>
   </div>
-</div>
-<div class="button-row">
-<button class="subtle" id="resetPreset"><span class="emoji">⟲ </span>Reset</button>
-<button class="subtle" onclick="copyShareLink()"><span class="emoji">🔗 </span>Share</button>
-</div>
-</div>
 
   <div class="card canvas-card">
     <div id="dinoTitle" class="dino-title"></div>
@@ -58,7 +58,7 @@
       <button class="subtle" id="modeFull">Spawn Command</button>
     </div>
   </div>
-</br></br>
+  </br></br>
   <div class="card ad-banner hidden" id="adBanner">
     <a id="adLink" href="#" target="_blank" rel="noopener">
       <img id="adImage" src="" alt="Server Advertisement">
@@ -68,8 +68,18 @@
   <button class="subtle" onclick="openAdForm()">
     📢 Want to Advertise Your Server? <span class="flip">📢</span>
   </button>
+  </div>
+
 </div>
 
+<div class="ad-rail left">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6496769592665493"
+     crossorigin="anonymous"></script>
+</div>
+
+<div class="ad-rail right">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6496769592665493"
+     crossorigin="anonymous"></script>
 </div>
 
 <script src="data/colors.js"></script>
