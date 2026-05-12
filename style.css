@@ -378,27 +378,50 @@ button.primary:hover {
 
 .ad-rail {
   position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 24px;
+
   width: 160px;
-  height: 600px;
+  min-height: 600px;
+
+  display: none;
+
   opacity: 0;
   transition: opacity 0.4s ease;
 
-  display: none; /* hidden by default */
-  z-index: 5;
+  z-index: 2;
+
+  pointer-events: auto;
 }
 
 .ad-rail.left {
-  left: 10px;
+  left: max(12px, calc((100vw - 700px) / 2 - 190px));
 }
 
 .ad-rail.right {
-  right: 10px;
+  right: max(12px, calc((100vw - 700px) / 2 - 190px));
 }
 
 .ad-rail.loaded {
   opacity: 1;
+}
+
+.ad-rail ins {
+  display: block;
+  width: 160px;
+  min-height: 600px;
+
+  border-radius: 12px;
+  overflow: hidden;
+
+  background: #1e293b;
+  box-shadow: 0 0 12px rgba(0,0,0,0.35);
+}
+
+/* Hide on shorter displays */
+@media (max-height: 700px) {
+  .ad-rail {
+    display: none !important;
+  }
 }
 
 .site-nav {
@@ -433,6 +456,10 @@ button.primary:hover {
 
 /* Responsive Design */
 @media (max-width: 600px) {
+  .ad-rail {
+    display: none !important;
+  }
+  
   button .emoji {
     display: none;
   }
