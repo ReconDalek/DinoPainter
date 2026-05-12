@@ -18,25 +18,43 @@ let commandMode = "simple";
 let currentAd = null;
 
 function loadAdBanner() {
-  if (typeof ADS === "undefined" || !ADS.length) {
-    console.warn("ADS not loaded");
+  console.log("Loading banner...");
+
+  if (typeof ADS === "undefined") {
+    console.error("ADS variable missing");
+    return;
+  }
+
+  if (!ADS.length) {
+    console.error("ADS array empty");
     return;
   }
 
   const ad = ADS[Math.floor(Math.random() * ADS.length)];
   currentAd = ad;
 
+  console.log("Selected ad:", ad);
+
   const banner = document.getElementById("adBanner");
   const img = document.getElementById("adImage");
   const link = document.getElementById("adLink");
+
+  if (!banner || !img || !link) {
+    console.error("Banner elements missing");
+    return;
+  }
+
+  img.onload = () => {
+    console.log("Image loaded successfully");
+  };
+
   img.onerror = () => {
-  console.error("Failed to load ad image:", ad.image);
-};
+    console.error("Failed to load image:", ad.image);
+  };
 
   img.src = ad.image;
   img.alt = ad.name;
   link.href = ad.link;
-
   link.title = ad.name;
 
   trackImpression(ad.id);
@@ -46,6 +64,8 @@ function loadAdBanner() {
   };
 
   banner.classList.remove("hidden");
+
+  console.log("Banner should now be visible");
 }
 
 
