@@ -86,11 +86,21 @@
 
 
 <div class="ad-rail left">
-
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-6496769592665493"
+       data-ad-slot="4387429612"
+       data-ad-format="vertical"
+       data-full-width-responsive="false"></ins>
 </div>
 
 <div class="ad-rail right">
-
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-6496769592665493"
+       data-ad-slot="4766703562"
+       data-ad-format="vertical"
+       data-full-width-responsive="false"></ins>
 </div>
 
 <script src="data/colors.js"></script>
@@ -98,6 +108,23 @@
 <script src="data/presets.js"></script>
 <script src="ads/ads.js"></script>
 <script src="script.js"></script>
+
+<script>
+  window.addEventListener("load", () => {
+    if (window.innerWidth >= 1400) {
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+        (adsbygoogle = window.adsbygoogle || []).push({});
+
+        document.querySelectorAll(".ad-rail").forEach(el => {
+          el.classList.add("loaded");
+        });
+      } catch (e) {
+        console.error("Adsense failed to load", e);
+      }
+    }
+  });
+</script>
   
 </body>
 </html>
