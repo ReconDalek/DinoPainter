@@ -29,6 +29,9 @@ function loadAdBanner() {
   const banner = document.getElementById("adBanner");
   const img = document.getElementById("adImage");
   const link = document.getElementById("adLink");
+  img.onerror = () => {
+  console.error("Failed to load ad image:", ad.image);
+};
 
   img.src = ad.image;
   img.alt = ad.name;
