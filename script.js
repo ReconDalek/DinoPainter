@@ -14,93 +14,8 @@ let regionState = {};
 let selectedDinoKey = Object.keys(DINOS)[0]; 
 let commandMode = "simple"; 
 
-
-let currentAd = null;
-
-function loadAdBanner() {
-  console.log("Loading banner...");
-
-  if (typeof ADS === "undefined") {
-    console.error("ADS variable missing");
-    return;
-  }
-
-  if (!ADS.length) {
-    console.error("ADS array empty");
-    return;
-  }
-
-  const ad = ADS[Math.floor(Math.random() * ADS.length)];
-  currentAd = ad;
-
-  console.log("Selected ad:", ad);
-
-  const banner = document.getElementById("adBanner");
-  const img = document.getElementById("adImage");
-  const link = document.getElementById("adLink");
-
-  if (!banner || !img || !link) {
-    console.error("Banner elements missing");
-    return;
-  }
-
-  img.onload = () => {
-    console.log("Image loaded successfully");
-  };
-
-  img.onerror = () => {
-    console.error("Failed to load image:", ad.image);
-  };
-
-  img.src = ad.image;
-  img.alt = ad.name;
-  link.href = ad.link;
-  link.title = ad.name;
-
-  trackImpression(ad.id);
-
-  link.onclick = () => {
-    trackClick(ad.id);
-  };
-
-  banner.classList.remove("hidden");
-
-  console.log("Banner should now be visible");
-}
-
-
-function trackImpression(adId) {
-  const stats = JSON.parse(localStorage.getItem("adStats") || "{}");
-
-  if (!stats[adId]) {
-    stats[adId] = { impressions: 0, clicks: 0 };
-  }
-
-  stats[adId].impressions++;
-
-  localStorage.setItem("adStats", JSON.stringify(stats));
-}
-
-function trackClick(adId) {
-  const stats = JSON.parse(localStorage.getItem("adStats") || "{}");
-
-  if (!stats[adId]) {
-    stats[adId] = { impressions: 0, clicks: 0 };
-  }
-
-  stats[adId].clicks++;
-
-  localStorage.setItem("adStats", JSON.stringify(stats));
-}
-
-function openAdForm() {
-  window.open("https://forms.gle/Wgz5Qdb8Fx5ZpPYT6", "_blank");
-}
-
-
 function renderDinoList(filter = "") {
   dinoList.innerHTML = "";
-  
   
   const filteredKeys = Object.keys(DINOS).filter(key => 
     DINOS[key].name.toLowerCase().includes(filter.toLowerCase())
@@ -112,7 +27,6 @@ function renderDinoList(filter = "") {
     div.textContent = DINOS[key].name;
     
     div.addEventListener("click", () => {
-      //dinoInput.value = DINOS[key].name;
       selectedDinoKey = key; 
       dinoList.classList.add("hidden");
       loadDino(); 
@@ -135,7 +49,6 @@ document.addEventListener("click", (e) => {
     dinoList.classList.remove("hidden");
   }
 });
-
 
 for (let key in PRESETS) {
   const ids = PRESETS[key];
@@ -171,8 +84,7 @@ presetDisplay.addEventListener("click", (e) => {
 });
 
 document.addEventListener("click", (e) => {
-  const clickedInsidePreset =
-    e.target.closest(".preset-container");
+  const clickedInsidePreset = e.target.closest(".preset-container");
 
   if (!clickedInsidePreset) {
     presetDropdown.classList.add("hidden");
@@ -190,11 +102,9 @@ resetBtn.addEventListener("click", () => {
   presetDisplay.style.background = "#1e293b";
   presetDisplay.style.color = "#fff";
 
-  //dinoInput.value = currentDino.name; 
   regionState = {}; 
   loadDino(); 
 });
-
 
 function applyPresetById(presetName) {
   const preset = PRESETS[presetName];
@@ -218,11 +128,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const firstKey = selectedDinoKey || Object.keys(DINOS)[0];
   selectedDinoKey = firstKey;
 
-  //dinoInput.value = DINOS[firstKey].name;
-
   loadDino();
-
-  loadAdBanner();
+  // ad logic handled cleanly outside this execution context now
 });
 
 document.getElementById("modeSimple").onclick = () => {
@@ -382,12 +289,9 @@ function applyMask(maskImg, baseImg, color) {
 
 function drawCentered(img, baseWidth, baseHeight) {
   const fitScale = Math.min(canvas.width / baseWidth, canvas.height / baseHeight);
-
   const scale = Math.min(1, fitScale);
-
   const drawWidth = img.width * scale;
   const drawHeight = img.height * scale;
-
   const x = (canvas.width - drawWidth) / 2;
   const y = (canvas.height - drawHeight) / 2;
 
@@ -398,7 +302,6 @@ function updateAdminCommand() {
   if (!currentDino) return;
 
   const commands = [];
-
   currentDino.regions.forEach(region => {
     const select = document.getElementById(`region-${region}`);
     if (!select || select.value === "unchanged") return;
@@ -418,10 +321,7 @@ function updateAdminCommand() {
       ? `cheat gmsummon "${currentDino.path}" 150`
       : `cheat gmsummon "<missing_path>" 150`;
 
-    const colorCommands = commands.length
-      ? `${commands.join(" | ")}`
-      : "";
-
+    const colorCommands = commands.length ? `${commands.join(" | ")}` : "";
     output = colorCommands ? `${spawn} | ${colorCommands}` : spawn;
   }
 
@@ -434,7 +334,6 @@ function autoResizeTextarea(el) {
   el.style.height = "auto";
   el.style.height = el.scrollHeight + "px";
 }
-
 
 function copyShareLink() {
   const url = window.location.href;
@@ -486,11 +385,9 @@ function updateURL() {
 
 function loadFromURL() {
   const params = new URLSearchParams(window.location.search);
-
   const dino = params.get("dino");
   if (dino && DINOS[dino]) {
     selectedDinoKey = dino;
-    //dinoInput.value = DINOS[dino].name;
   }
 
   regionState = {};
@@ -544,20 +441,13 @@ function smartRandomize() {
 
     let similar = COLORS.filter(c => {
       const rgb = hexToRgb(c.hex);
-      const dist =
-        Math.abs(rgb.r - baseRGB.r) +
-        Math.abs(rgb.g - baseRGB.g) +
-        Math.abs(rgb.b - baseRGB.b);
-
+      const dist = Math.abs(rgb.r - baseRGB.r) + Math.abs(rgb.g - baseRGB.g) + Math.abs(rgb.b - baseRGB.b);
       return dist < 220;
     });
 
-    if (similar.length === 0) {
-      similar = COLORS;
-    }
+    if (similar.length === 0) similar = COLORS;
 
     const chosen = similar[Math.floor(Math.random() * similar.length)];
-
     const existsInSelect = [...select.options].some(opt => opt.value === chosen.hex);
 
     if (existsInSelect) {
@@ -576,41 +466,34 @@ function smartRandomize() {
 }
 
 function hslToHex(h, s, l) {
-  s /= 100;
-  l /= 100;
-
+  s /= 100; l /= 100;
   const k = n => (n + h / 30) % 12;
   const a = s * Math.min(l, 1 - l);
-
-  const f = n =>
-    Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
-
-  return `#${[f(0), f(8), f(4)]
-    .map(x => x.toString(16).padStart(2, "0"))
-    .join("")}`;
+  const f = n => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))));
+  return `#${[f(0), f(8), f(4)].map(x => x.toString(16).padStart(2, "0")).join("")}`;
 }
 
 async function generate() {
   if (window.AndroidBridge) {
-        AndroidBridge.onGenerateCalled();
-    }
+    AndroidBridge.onGenerateCalled();
+  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (!baseImage.complete) {
-  await new Promise((res, rej) => {
-    baseImage.onload = res;
-    baseImage.onerror = rej;
-  }).catch(() => {
-    drawErrorPlaceholder("Base image failed to load");
-    return;
-  });
-}
+    await new Promise((res, rej) => {
+      baseImage.onload = res;
+      baseImage.onerror = rej;
+    }).catch(() => {
+      drawErrorPlaceholder("Base image failed to load");
+      return;
+    });
+  }
   await Promise.all(Object.values(masks).map(img => {
-  if (img.complete) return Promise.resolve();
-  return new Promise((res) => {
-    img.onload = res;
-    img.onerror = res; 
-  });
-}));
+    if (img.complete) return Promise.resolve();
+    return new Promise((res) => {
+      img.onload = res;
+      img.onerror = res; 
+    });
+  }));
 
   drawCentered(baseImage, baseImage.width, baseImage.height);
 
@@ -630,27 +513,21 @@ async function generate() {
 
 function drawErrorPlaceholder(text) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   ctx.fillStyle = "#111";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   ctx.fillStyle = "#ef4444";
   ctx.font = "16px Arial";
   ctx.textAlign = "center";
-
   ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 }
-
 
 function copyCommand() {
   const textarea = document.getElementById("adminCommand");
   const button = document.querySelector(".copy-btn");
-
   const text = textarea.value;
 
   navigator.clipboard.writeText(text).then(() => {
     const originalContent = button.innerHTML;
-
     button.innerHTML = "✔";
     button.style.background = "#22c55e";
     button.style.borderColor = "#22c55e";
@@ -665,8 +542,6 @@ function copyCommand() {
     }, 2000);
   }).catch(() => {
     button.innerHTML = "✖";
-    setTimeout(() => {
-      button.innerHTML = "📋";
-    }, 1500);
+    setTimeout(() => { button.innerHTML = "📋"; }, 1500);
   });
 }

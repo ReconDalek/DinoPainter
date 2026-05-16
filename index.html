@@ -11,8 +11,27 @@
 </head>
 <body>
 
+  <!-- Intro -->
 <div class="app">
   <h1>ARK Dino Painter</h1>
+  <div class="card intro-card">
+  <h2>ARK Dino Painter & Creature Color Generator</h2>
+
+  <p>
+    Create custom ARK: Survival Ascended and ARK: Survival Evolved dinosaur
+    color combinations using every official in-game color region.
+  </p>
+
+  <p>
+    Select a creature, customize its color regions, preview the appearance,
+    and instantly generate admin commands for your server.
+  </p>
+
+  <p>
+    This tool supports randomized color generation, themed presets,
+    and spawn command creation for server administrators and players.
+  </p>
+</div>
 
   <!-- Dino Select -->
   <div class="card">
@@ -61,9 +80,31 @@
     </div>
   </div>
 
+  <!-- Footer -->
+  <div class="card info-card">
+  <h2>How To Use</h2>
+
+  <p>
+    Choose a dinosaur from the search box, then select colors for each
+    available region. The preview updates automatically.
+  </p>
+
+  <p>
+    Use Randomize for fully random colors or Smart Randomize for
+    matching color palettes.
+  </p>
+
+  <p>
+    The generated admin command can be copied directly into your ARK server.
+  </p>
+</div>
+
   <div class="card site-nav">
     <div class="site-nav-links">
       <a href="index.html">Dino Painter</a>
+      <a href="about.html">About</a>
+      <a href="how-to-use.html">How To Use</a>
+      <a href="faq.html">FAQ</a>
       <a href="privacy.html">Privacy Policy</a>
       <a href="terms.html">Terms of Service</a>
     </div>
@@ -103,25 +144,28 @@
        data-full-width-responsive="false"></ins>
 </div>
 
-<script src="data/colors.js"></script>
-<script src="data/dinos.js"></script>
-<script src="data/presets.js"></script>
-<script src="ads/ads.js"></script>
+<script src="/data/colors.js"></script>
+<script src="/data/dinos.js"></script>
+<script src="/data/presets.js"></script>
+<script src="/ads/ads.js"></script>
+<script src="/ads/ads-manager.js"></script>
 <script src="script.js"></script>
 
 <script>
   window.addEventListener("load", () => {
-    if (window.innerWidth >= 1400) {
-      try {
-        (adsbygoogle = window.adsbygoogle || []).push({});
-        (adsbygoogle = window.adsbygoogle || []).push({});
+    if (window.innerWidth >= 1600 && window.innerHeight >= 900) {
+      setTimeout(() => {
+        try {
+          (adsbygoogle = window.adsbygoogle || []).push({});
+          (adsbygoogle = window.adsbygoogle || []).push({});
 
-        document.querySelectorAll(".ad-rail").forEach(el => {
-          el.classList.add("loaded");
-        });
-      } catch (e) {
-        console.error("Adsense failed to load", e);
-      }
+          document.querySelectorAll(".ad-rail").forEach(el => {
+            el.classList.add("loaded");
+          });
+        } catch (e) {
+          console.error("Adsense failed to load", e);
+        }
+      }, 1500);
     }
   });
 </script>
