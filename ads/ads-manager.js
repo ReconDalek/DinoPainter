@@ -73,7 +73,7 @@ function trackClick(adId) {
 }
 
 function openAdForm() {
-  window.open("https://forms.gle/Wgz5Qdb8Fx5ZpPYT6", "_blank");
+  window.open("https://discord.gg/dbeYwQ34Dc", "_blank");
 }
 
 // Automatically bootstrap ad operations when document is ready
