@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
   <title>FAQ - ARK Dino Painter</title>
+  <meta name="description" content="Answers to common questions about ARK Dino Painter — colour regions, admin commands, setTargetDinoColor, spawning coloured creatures, and sharing designs.">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -15,41 +17,146 @@
   <div class="card">
     <h2>Is this official ARK software?</h2>
     <p>
-      No. This is an unofficial fan-made tool designed for ARK server administrators and players.
+      No. ARK Dino Painter is an unofficial, fan-made tool for ARK: Survival
+      Ascended and ARK: Survival Evolved. It is not affiliated with Studio
+      Wildcard or Snail Games, and ARK and all related names are trademarks of
+      their respective owners.
     </p>
   </div>
 
   <div class="card">
-    <h2>Does this work on all dinos?</h2>
+    <h2>What are colour regions?</h2>
     <p>
-      It supports all creatures included in the tool’s database with defined colour regions, New dino's may not be added instantly.
+      Every ARK creature has up to six colour regions, numbered 0 to 5. Each
+      region covers a different part of the body — for example the main body,
+      spines, wings, or highlights — and the exact meaning of each region
+      changes from creature to creature. When a creature spawns, the game rolls
+      a random colour for each of its <em>enabled</em> regions. This tool lets
+      you set those regions manually.
     </p>
   </div>
 
   <div class="card">
-    <h2>Do I need a server to use this?</h2>
+    <h2>Why don't some regions do anything?</h2>
     <p>
-      No. You can use it for design and previewing, but admin commands require a server or single player to use.
+      Not every creature uses all six regions. A Rex, for instance, only uses
+      regions 0, 1, 4 and 5 — the other two are disabled in the game files, so
+      changing them has no effect. The painter greys out any region a creature
+      does not support so you only edit the ones that matter.
     </p>
   </div>
 
   <div class="card">
-    <h2>Why don’t some regions change?</h2>
+    <h2>What does the "Colour Command" do?</h2>
     <p>
-      Not all creatures support all colour regions. Disabled regions are not editable as they are not used in the game.
+      It produces a <code>cheat setTargetDinoColor &lt;region&gt; &lt;colourID&gt;</code>
+      command for each region you have changed. Look at the creature you want
+      to recolour, paste the command into the console (or send it via an admin
+      chat command / RCON), and the creature updates instantly. It works on
+      tamed creatures, wild creatures, and creatures you have just spawned.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>What does the "Spawn Command" do?</h2>
+    <p>
+      It combines a <code>gmsummon</code> for the selected creature with the
+      colour commands, so you can spawn a creature and paint it in one line.
+      Some creatures in the database do not yet have a blueprint path attached;
+      for those the spawn portion shows a placeholder you will need to fill in.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>How do I open the console to enter commands?</h2>
+    <p>
+      On PC, press <strong>Tab</strong> (or the key bound to "console" in your
+      settings) while in game. You may first need to run
+      <code>enablecheats &lt;password&gt;</code> on a server, or enable admin
+      access in single player / non-dedicated sessions. On console platforms,
+      use the admin command bar in the pause menu.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Do the colour IDs match the in-game colours exactly?</h2>
+    <p>
+      The IDs are the official ARK colour IDs, so the command is accurate. The
+      swatches in the preview are an approximation — in game, a colour is
+      multiplied against the creature's underlying texture and lighting, so the
+      final look varies by creature and by map. Use the preview as a guide, not
+      a pixel-perfect match.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Does this work on both ARK: Survival Ascended and Survival Evolved?</h2>
+    <p>
+      Yes. The colour region system and the <code>setTargetDinoColor</code>
+      command work the same way in both games. A handful of creatures are
+      exclusive to one version, and colour IDs above the classic 0–56 range are
+      mainly relevant to ASA and event colours.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Can I use this on a server I don't own?</h2>
+    <p>
+      Only if you have admin rights on that server. The tool just builds the
+      command text — whether it runs depends on your permissions. On unofficial
+      servers, ask the owner; on official servers, admin commands are not
+      available to players.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Will painting a creature affect breeding or mutations?</h2>
+    <p>
+      No. Colours applied with <code>setTargetDinoColor</code> are cosmetic and
+      are not inherited. Breeding colours come from the parents' colour regions
+      and the game's mutation system, which this tool does not change.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Does this work on all creatures?</h2>
+    <p>
+      It supports every creature in the tool's database that has defined colour
+      regions. Newly released creatures may take some time to be added.
     </p>
   </div>
 
   <div class="card">
     <h2>Can I share my designs?</h2>
     <p>
-      Yes. You can copy or share the generated URL which preserves your configuration.
+      Yes. Your current creature and colours are stored in the page URL, so you
+      can copy the link and send it to anyone — it reopens with the same design
+      loaded. You can also browse the <a href="gallery.html">gallery</a> for
+      ready-made designs, each with its own shareable page and command.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>How do I get a design added to the gallery?</h2>
+    <p>
+      Share the link to your design in our
+      <a href="https://discord.gg/dbeYwQ34Dc" target="_blank" rel="noopener">Discord</a>.
+      Standout designs get added to the gallery with a credit.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Is there a mobile version?</h2>
+    <p>
+      The website works on mobile browsers, and there is a dedicated Android
+      app. The colour data and commands are identical across both.
     </p>
   </div>
 
   <div class="card site-nav">
     <div class="site-nav-links">
       <a href="index.html">Dino Painter</a>
+      <a href="gallery.html">Gallery</a>
       <a href="about.html">About</a>
       <a href="how-to-use.html">How To Use</a>
       <a href="faq.html">FAQ</a>

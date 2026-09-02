@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Design Gallery - ARK Dino Painter</title>
+  <meta name="description" content="A gallery of ARK creature colour designs — Rex, Spino, Rock Drake, Argentavis and more — each with a ready-to-use setTargetDinoColor command.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<div class="app app-wide">
+  <h1>Design Gallery</h1>
+
+  <div class="card intro-card">
+    <p>
+      A curated set of ARK: Survival Ascended and ARK: Survival Evolved creature
+      colour designs. Open any design to see its colour regions and copy the
+      admin command, or load it straight into the painter to tweak it.
+    </p>
+    <p>
+      Made something good? <a href="https://discord.gg/dbeYwQ34Dc" target="_blank" rel="noopener">Submit it on Discord</a>
+      and it may be added here.
+    </p>
+  </div>
+
+  <div id="galleryGrid" class="gallery-grid"></div>
+
+  <div class="card site-nav">
+    <div class="site-nav-links">
+      <a href="index.html">Dino Painter</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="about.html">About</a>
+      <a href="how-to-use.html">How To Use</a>
+      <a href="faq.html">FAQ</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
+  </div>
+
+  <div class="card ad-banner hidden" id="adBanner">
+    <a id="adLink" href="#" target="_blank" rel="noopener">
+      <img id="adImage" src="" alt="Server Advertisement">
+    </a>
+  </div>
+  <div class="ad-cta">
+    <button class="subtle" onclick="openAdForm()">
+      📢 Want to Advertise Your Server? <span class="flip">📢</span>
+    </button>
+  </div>
+</div>
+
+<script src="/data/colors.js"></script>
+<script src="/data/dinos.js"></script>
+<script src="/data/presets.js"></script>
+<script src="/data/preview.js"></script>
+<script src="/data/gallery.js"></script>
+<script src="/data/gallery-ui.js"></script>
+<script src="/ads/ads.js"></script>
+<script src="/ads/ads-manager.js"></script>
+<script>
+  renderGalleryGrid("galleryGrid");
+</script>
+
+</body>
+</html>

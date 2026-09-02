@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Creature Colour Design - ARK Dino Painter</title>
+  <meta name="description" content="An ARK creature colour design with a ready-to-use setTargetDinoColor admin command.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="ogTitle" content="Creature Colour Design - ARK Dino Painter">
+  <meta property="og:description" id="ogDesc" content="An ARK creature colour design with a ready-to-use admin command.">
+</head>
+<body>
+
+<div class="app">
+  <h1 id="designTitle">Creature Colour Design</h1>
+
+  <div class="card canvas-card">
+    <div id="designDino" class="dino-title"></div>
+    <canvas id="designCanvas" width="512" height="512"></canvas>
+  </div>
+
+  <div class="card">
+    <p id="designBlurb"></p>
+    <p id="designRegions" class="design-regions"></p>
+    <div id="designSwatches"></div>
+  </div>
+
+  <div class="card">
+    <div class="headerlabel">Colour Command</div>
+    <div class="admin-wrapper">
+      <textarea id="designCommand" readonly></textarea>
+      <button class="copy-btn" onclick="copyDesignCommand()">📋</button>
+    </div>
+    <div class="button-row">
+      <a id="openInPainter" class="button-link primary" href="index.html">🎨 Open in the painter</a>
+    </div>
+  </div>
+
+  <!--
+    Affiliate slot: drop a server-hosting banner/link here once a program is
+    approved. High-intent placement — the visitor just copied a spawn/colour
+    command.
+  -->
+  <div class="card ad-banner hidden" id="adBanner">
+    <a id="adLink" href="#" target="_blank" rel="noopener">
+      <img id="adImage" src="" alt="Server Advertisement">
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="headerlabel">More designs</div>
+    <div id="relatedGrid" class="gallery-grid gallery-grid-compact"></div>
+  </div>
+
+  <div class="card site-nav">
+    <div class="site-nav-links">
+      <a href="index.html">Dino Painter</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="about.html">About</a>
+      <a href="how-to-use.html">How To Use</a>
+      <a href="faq.html">FAQ</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
+  </div>
+</div>
+
+<script src="/data/colors.js"></script>
+<script src="/data/dinos.js"></script>
+<script src="/data/presets.js"></script>
+<script src="/data/preview.js"></script>
+<script src="/data/gallery.js"></script>
+<script src="/data/gallery-ui.js"></script>
+<script src="/ads/ads.js"></script>
+<script src="/ads/ads-manager.js"></script>
+<script>
+  (function () {
+    const params = new URLSearchParams(location.search);
+    let entry = null;
+
+    const id = params.get("id");
+    if (id) {
+      entry = galleryEntryById(id);
+    }
+
+    // Fall back to a design described directly in the URL (a shared link).
+    if (!entry) {
+      const dinoKey = params.get("dino");
+      if (dinoKey && DINOS[dinoKey]) {
+        const colors = {};
+        for (let r = 0; r < 6; r++) {
+          const v = params.get(`r${r}`);
+          if (v) colors[r] = Number(v);
+        }
+        entry = {
+          id: null,
+          dino: dinoKey,
+          title: `${DINOS[dinoKey].name} colour scheme`,
+          colors,
+          blurb: "",
+          credit: "Community"
+        };
+      }
+    }
+
+    const wrap = document.querySelector(".app");
+    if (!entry || !DINOS[entry.dino]) {
+      wrap.querySelector("#designTitle").textContent = "Design not found";
+      wrap.querySelector("#designBlurb").textContent =
+        "That design link is missing or invalid. Browse the gallery instead.";
+      return;
+    }
+
+    const dino = DINOS[entry.dino];
+    const colors = resolveEntryColors(entry, dino);
+    const colourList = describeColors(colors);
+    const command = buildColourCommand(entry);
+
+    // --- Text content ---
+    const titleText = `${entry.title} — ${dino.name} colour scheme`;
+    document.title = `${titleText} | ARK Dino Painter`;
+    document.getElementById("designTitle").textContent = entry.title;
+    document.getElementById("designDino").textContent = dino.name;
+
+    const blurb =
+      (entry.blurb ? entry.blurb + " " : "") +
+      `This is a colour design for the ${dino.name} in ARK: Survival Ascended and ` +
+      `ARK: Survival Evolved. It sets ${Object.keys(colors).length} colour ` +
+      `region${Object.keys(colors).length === 1 ? "" : "s"}: ${colourList}. ` +
+      `Copy the command below to apply it to a tamed or spawned ${dino.name}.`;
+    document.getElementById("designBlurb").textContent = blurb;
+    document.getElementById("designRegions").textContent = colourList;
+
+    const metaDesc = `${entry.title}: an ARK ${dino.name} colour design (${colourList}) with a ready-to-use admin command.`;
+    document.querySelector('meta[name="description"]').setAttribute("content", metaDesc);
+    document.getElementById("ogTitle").setAttribute("content", titleText);
+    document.getElementById("ogDesc").setAttribute("content", metaDesc);
+
+    // --- Visuals ---
+    const hexMap = {};
+    Object.entries(colors).forEach(([r, c]) => (hexMap[r] = c.hex));
+    paintDino(document.getElementById("designCanvas"), dino, hexMap);
+    document.getElementById("designSwatches").appendChild(renderSwatchStrip(colors));
+
+    // --- Command ---
+    const cmd = document.getElementById("designCommand");
+    cmd.value = command || "This design leaves every region unchanged.";
+    cmd.style.height = "auto";
+    cmd.style.height = cmd.scrollHeight + "px";
+
+    document.getElementById("openInPainter").href = buildPainterUrl(entry);
+
+    // --- Related designs ---
+    const related = GALLERY.filter((e) => e.id !== entry.id)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 6);
+    const grid = document.getElementById("relatedGrid");
+    related.forEach((e) => grid.appendChild(renderGalleryCard(e)));
+
+    // --- Structured data ---
+    const ld = document.createElement("script");
+    ld.type = "application/ld+json";
+    ld.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      name: titleText,
+      description: metaDesc,
+      about: `ARK ${dino.name} colour regions`,
+      creator: { "@type": "Organization", name: entry.credit || "ARK Dino Painter" }
+    });
+    document.head.appendChild(ld);
+  })();
+
+  function copyDesignCommand() {
+    const text = document.getElementById("designCommand").value;
+    navigator.clipboard.writeText(text).catch(() => {});
+    const btn = document.querySelector(".copy-btn");
+    const original = btn.innerHTML;
+    btn.innerHTML = "✔";
+    setTimeout(() => (btn.innerHTML = original), 1500);
+  }
+</script>
+
+</body>
+</html>
