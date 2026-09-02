@@ -10,8 +10,16 @@ const PROMOS = [
   {
     id: "server2",
     name: "TGP ASA",
-    image: "/promos/TGP_ASA.gif",
+    image: "/promos/TGP_ASA.webp",
     link: "https://discord.gg/4tpdPKBuHE",
+    impressions: 0,
+    clicks: 0
+  },
+  {
+    id: "server3",
+    name: "ExArk",
+    image: "/promos/ExArk.webp",
+    link: "https://discord.gg/NnxGD2wNZV",
     impressions: 0,
     clicks: 0
   }
