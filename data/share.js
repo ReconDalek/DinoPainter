@@ -38,6 +38,9 @@ function _buildShareModal() {
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) _closeShareModal();
   });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.classList.contains("hidden")) _closeShareModal();
+  });
   overlay.querySelector("#shareCancel").addEventListener("click", _closeShareModal);
   overlay.querySelector("#shareSubmit").addEventListener("click", _doSubmit);
 
@@ -47,6 +50,7 @@ function _buildShareModal() {
 
 function _closeShareModal() {
   if (_shareModal) _shareModal.classList.add("hidden");
+  document.body.classList.remove("share-open");
 }
 
 async function _doSubmit() {
@@ -85,4 +89,5 @@ function shareToGallery() {
   _shareModal.querySelector("#shareTitle").value = "";
   _shareModal.querySelector("#shareCredit").value = "";
   _shareModal.classList.remove("hidden");
+  document.body.classList.add("share-open");
 }
