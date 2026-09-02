@@ -54,15 +54,34 @@ In the Pages project → **Settings → Variables and Secrets** (Production), ad
 
 Generate values with `openssl rand -hex 32` or similar. Keep `ADMIN_TOKEN` private.
 
-## 5. Moderate submissions
+## 5. Admin panel
 
-Go to `https://your-domain/admin.html`, paste the `ADMIN_TOKEN`, and approve or
-reject pending designs. Approved designs appear in the gallery and get their own
-`/design.html?id=…` page automatically.
+Go to `https://your-domain/admin.html`, paste the `ADMIN_TOKEN` (it's saved in
+that browser's `localStorage` after the first unlock — "Forget token" clears it).
+
+Two tabs:
+
+- **Design submissions** — approve / reject pending gallery designs. Approved ones
+  appear in the gallery with their own `/design.html?id=…` page.
+- **Promos** — the banner rotation lives in D1 now, not code. Add / edit / delete
+  promos, toggle them on/off, set rotation weight, and see impressions, clicks and
+  CTR per promo. Public "Advertise your server" requests land here as pending rows
+  to approve or reject.
 
 `admin.html` is `noindex` and gated by the token. For extra safety you can also
 put **Cloudflare Access** (Zero Trust → free for small teams) in front of
 `/admin.html` and `/api/admin/*`, gated by your Google login.
+
+## When you add a migration
+
+`migrations/` is applied in order. After pulling a new one:
+
+```bash
+npx wrangler d1 migrations apply dinopainter --remote
+```
+
+Wrangler only runs migrations not yet applied. The promo table + click/impression
+tracking come from `0002_promos.sql`.
 
 ## Local development
 
@@ -75,12 +94,18 @@ npm run dev                         # http://localhost:8788
 
 ## Abuse controls in place
 
-- Submissions are stored as `pending` — nothing is public until approved.
-- Server-side validation: creature must exist, 1–6 regions, colour IDs 1–255,
-  text fields stripped of HTML and length-capped.
-- Rate limit: 8 submissions per hour per hashed IP (raw IP never stored).
-- Optional next step: add a Cloudflare **Turnstile** widget to the share modal
-  and verify the token in `functions/api/designs/index.js`.
+- Gallery submissions and promo requests are stored as `pending` — nothing is
+  public until you approve it.
+- Server-side validation everywhere: creature must exist, 1–6 regions, colour IDs
+  1–255; promo URLs must be `/promos/…` or `https://…`; text stripped of HTML and
+  length-capped.
+- Rate limits per hashed IP (raw IP never stored): 8 design submissions/hour,
+  3 promo requests/day.
+- `POST /api/promos/:id/impression` and `/click` are unauthenticated counter
+  bumps (one D1 write each). Fine at this scale; if traffic grows a lot, add a
+  Cloudflare **Rate Limiting Rule** on `/api/promos/*/impression` in the
+  dashboard, or move the counters to Analytics Engine.
+- Optional next step: add a Cloudflare **Turnstile** widget to the submit modals.
 
 ## Files
 

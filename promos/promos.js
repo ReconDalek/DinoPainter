@@ -1,3 +1,6 @@
+// Offline fallback only. The live rotation is managed in the admin panel and
+// served from /api/promos (D1). This list is used just when that API is
+// unreachable.
 const PROMOS = [
   {
     id: "server1",

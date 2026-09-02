@@ -3,26 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="robots" content="noindex, nofollow">
-  <title>Gallery Moderation - ARK Dino Painter</title>
+  <title>Admin - ARK Dino Painter</title>
   <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .admin-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+    .admin-tab.active { background: #334155; color: #fff; border-color: #64748b; }
+    .promo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .promo-table th, .promo-table td { padding: 8px 6px; border-bottom: 1px solid #334155; text-align: left; vertical-align: middle; }
+    .promo-table th { color: #94a3b8; font-weight: 600; }
+    .promo-thumb { width: 96px; height: 54px; object-fit: cover; border-radius: 4px; background: #000; display: block; }
+    .promo-table input[type="text"], .promo-table input[type="url"] { width: 100%; padding: 5px 6px; border-radius: 5px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; box-sizing: border-box; }
+    .promo-table input[type="number"] { width: 56px; padding: 5px; border-radius: 5px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
+    .mini { min-width: 0; padding: 5px 9px; font-size: 12px; }
+    .stat { font-variant-numeric: tabular-nums; }
+    .pill { font-size: 11px; padding: 2px 7px; border-radius: 999px; background: #334155; color: #cbd5e1; }
+    .promo-form { display: grid; gap: 8px; max-width: 480px; }
+    .promo-form input { padding: 7px 8px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
+    .row-actions { white-space: nowrap; display: flex; gap: 4px; }
+    .scroll-x { overflow-x: auto; }
+  </style>
 </head>
 <body>
 
 <div class="app app-wide">
-  <h1>Gallery Moderation</h1>
+  <h1>Admin</h1>
 
   <div class="card" id="authCard">
-    <label>Admin token
-      <input type="password" id="tokenInput" placeholder="ADMIN_TOKEN" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;box-sizing:border-box;">
-    </label>
-    <div class="button-row">
-      <button class="primary" id="loadBtn">Load pending</button>
-    </div>
-    <p id="authMsg" class="design-regions"></p>
+    <form id="authForm" autocomplete="on">
+      <input type="text" name="username" value="dinopainter-admin" autocomplete="username"
+             style="display:none" readonly aria-hidden="true">
+      <label>Admin token
+        <input type="password" id="tokenInput" name="password" autocomplete="current-password"
+               placeholder="ADMIN_TOKEN"
+               style="width:100%;margin-top:6px;padding:8px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;box-sizing:border-box;">
+      </label>
+      <div class="button-row">
+        <button type="submit" class="primary" id="loadBtn">Unlock</button>
+        <button type="button" class="subtle" id="forgetBtn">Forget token</button>
+      </div>
+      <p id="authMsg" class="design-regions"></p>
+    </form>
   </div>
 
-  <div id="queue" class="gallery-grid"></div>
+  <div id="panel" hidden>
+    <div class="admin-tabs">
+      <button class="subtle admin-tab active" data-tab="submissions">Design submissions</button>
+      <button class="subtle admin-tab" data-tab="promos">Promos</button>
+    </div>
+
+    <section id="tab-submissions">
+      <div class="card">
+        <div class="headerlabel">Pending designs <span class="pill" id="subCount">0</span></div>
+        <div id="queue" class="gallery-grid"></div>
+      </div>
+    </section>
+
+    <section id="tab-promos" hidden>
+      <div class="card">
+        <div class="headerlabel">Requests <span class="pill" id="reqCount">0</span></div>
+        <div class="scroll-x"><table class="promo-table"><tbody id="promoRequests"></tbody></table></div>
+        <p id="reqEmpty" class="design-regions">No pending requests.</p>
+      </div>
+
+      <div class="card">
+        <div class="headerlabel">Active rotation</div>
+        <div class="scroll-x"><table class="promo-table">
+          <thead><tr>
+            <th>Banner</th><th>Name</th><th>On</th><th>Wt</th>
+            <th class="stat">Impr.</th><th class="stat">Clicks</th><th class="stat">CTR</th><th></th>
+          </tr></thead>
+          <tbody id="promoRows"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="headerlabel" id="promoFormTitle">Add a promo</div>
+        <div class="promo-form">
+          <input type="text" id="pfName" maxlength="40" placeholder="Server name">
+          <input type="url" id="pfImage" maxlength="500" placeholder="Image URL — /promos/x.webp or https://…">
+          <input type="url" id="pfLink" maxlength="500" placeholder="Link URL — https://discord.gg/…">
+          <input type="number" id="pfWeight" min="1" max="100" value="1" title="Rotation weight">
+          <div id="pfResult" class="design-regions"></div>
+          <div class="button-row">
+            <button class="primary" id="pfSave">Add promo</button>
+            <button class="subtle" id="pfCancel" hidden>Cancel edit</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <script src="/data/config.js"></script>
@@ -34,102 +104,224 @@
 <script src="/data/remote-gallery.js"></script>
 <script src="/data/gallery-ui.js"></script>
 <script>
-  const tokenInput = document.getElementById("tokenInput");
-  const authMsg = document.getElementById("authMsg");
-  tokenInput.value = sessionStorage.getItem("adminToken") || "";
+(function () {
+  const TOKEN_KEY = "dp_admin_token";
+  const base = typeof API_BASE !== "undefined" ? API_BASE : "";
+  const $ = (s) => document.querySelector(s);
 
-  document.getElementById("loadBtn").addEventListener("click", loadQueue);
+  const tokenInput = $("#tokenInput");
+  const authMsg = $("#authMsg");
+  const panel = $("#panel");
+  tokenInput.value = localStorage.getItem(TOKEN_KEY) || "";
+
+  function token() { return tokenInput.value.trim(); }
 
   async function api(path, opts = {}) {
-    return fetch(`${API_BASE}${path}`, {
+    return fetch(`${base}${path}`, {
       ...opts,
-      headers: {
-        "content-type": "application/json",
-        Authorization: `Bearer ${tokenInput.value.trim()}`,
-        ...(opts.headers || {}),
-      },
+      headers: { "content-type": "application/json", Authorization: `Bearer ${token()}`, ...(opts.headers || {}) },
     });
   }
 
-  async function loadQueue() {
-    authMsg.textContent = "Loading…";
-    sessionStorage.setItem("adminToken", tokenInput.value.trim());
-    const res = await api("/api/admin/pending");
-    if (res.status === 401) {
-      authMsg.textContent = "Bad token.";
-      return;
-    }
-    if (!res.ok) {
-      authMsg.textContent = `Error ${res.status}`;
-      return;
-    }
-    const { designs } = await res.json();
-    authMsg.textContent = `${designs.length} pending`;
+  // ---- auth ----
+  $("#authForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    authMsg.textContent = "Checking…";
+    const res = await api("/api/admin/promos");
+    if (res.status === 401) { authMsg.textContent = "Wrong token."; panel.hidden = true; return; }
+    if (!res.ok) { authMsg.textContent = `Error ${res.status}`; return; }
+    localStorage.setItem(TOKEN_KEY, token());
+    authMsg.textContent = "Unlocked.";
+    panel.hidden = false;
+    loadSubmissions();
+    renderPromos(await res.json());
+  });
 
-    const queue = document.getElementById("queue");
+  $("#forgetBtn").addEventListener("click", () => {
+    localStorage.removeItem(TOKEN_KEY);
+    tokenInput.value = "";
+    panel.hidden = true;
+    authMsg.textContent = "Token cleared from this browser.";
+  });
+
+  // ---- tabs ----
+  document.querySelectorAll(".admin-tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".admin-tab").forEach((b) => b.classList.toggle("active", b === btn));
+      $("#tab-submissions").hidden = btn.dataset.tab !== "submissions";
+      $("#tab-promos").hidden = btn.dataset.tab !== "promos";
+    });
+  });
+
+  // ---- design submissions ----
+  async function loadSubmissions() {
+    const res = await api("/api/admin/pending");
+    if (!res.ok) return;
+    const { designs } = await res.json();
+    $("#subCount").textContent = designs.length;
+    const queue = $("#queue");
     queue.innerHTML = "";
-    designs.forEach((d) => queue.appendChild(renderReviewCard(d)));
+    designs.forEach((d) => queue.appendChild(reviewCard(d)));
   }
 
-  function renderReviewCard(d) {
+  function reviewCard(d) {
     const dino = DINOS[d.dino];
     const colors = resolveEntryColors(d, dino);
-
     const card = document.createElement("div");
     card.className = "gallery-card";
-
     const canvas = document.createElement("canvas");
-    canvas.width = 256;
-    canvas.height = 256;
-    canvas.className = "gallery-card-canvas";
+    canvas.width = 256; canvas.height = 256; canvas.className = "gallery-card-canvas";
     const hexMap = {};
     Object.entries(colors).forEach(([r, c]) => (hexMap[r] = c.hex));
     paintDino(canvas, dino, hexMap);
-
     const body = document.createElement("div");
     body.className = "gallery-card-body";
-    body.innerHTML = `
-      <div class="gallery-card-title">${escapeHtml(d.title || "(untitled)")}</div>
-      <div class="gallery-card-sub">${dino ? dino.name : d.dino} · ${escapeHtml(d.credit || "no credit")}</div>`;
+    body.innerHTML = `<div class="gallery-card-title">${esc(d.title || "(untitled)")}</div>
+      <div class="gallery-card-sub">${dino ? dino.name : esc(d.dino)} · ${esc(d.credit || "no credit")}</div>`;
     body.appendChild(renderSwatchStrip(colors));
-
     const row = document.createElement("div");
     row.className = "button-row";
-    const approve = document.createElement("button");
-    approve.className = "primary";
-    approve.textContent = "Approve";
-    const reject = document.createElement("button");
-    reject.className = "subtle";
-    reject.textContent = "Reject";
-    approve.onclick = () => moderate(d.id, "approve", card);
-    reject.onclick = () => moderate(d.id, "reject", card);
-    row.appendChild(approve);
-    row.appendChild(reject);
+    row.append(
+      actionBtn("primary", "Approve", () => moderateDesign(d.id, "approve", card)),
+      actionBtn("subtle", "Reject", () => moderateDesign(d.id, "reject", card))
+    );
     body.appendChild(row);
-
-    card.appendChild(canvas);
-    card.appendChild(body);
+    card.append(canvas, body);
     return card;
   }
 
-  async function moderate(id, action, card) {
-    const res = await api(`/api/admin/designs/${id}`, {
-      method: "POST",
-      body: JSON.stringify({ action }),
-    });
-    if (res.ok) {
-      card.style.opacity = "0.35";
-      card.querySelectorAll("button").forEach((b) => (b.disabled = true));
-    } else {
-      alert(`Failed: ${res.status}`);
-    }
+  async function moderateDesign(id, action, card) {
+    const res = await api(`/api/admin/designs/${id}`, { method: "POST", body: JSON.stringify({ action }) });
+    if (res.ok) { card.style.opacity = "0.35"; card.querySelectorAll("button").forEach((b) => (b.disabled = true)); }
+    else alert(`Failed: ${res.status}`);
   }
 
-  function escapeHtml(s) {
+  // ---- promos ----
+  let editingId = null;
+
+  async function loadPromos() {
+    const res = await api("/api/admin/promos");
+    if (res.ok) renderPromos(await res.json());
+  }
+
+  function renderPromos({ promos }) {
+    const pending = promos.filter((p) => p.status === "pending");
+    const active = promos.filter((p) => p.status === "approved");
+
+    $("#reqCount").textContent = pending.length;
+    $("#reqEmpty").hidden = pending.length > 0;
+    const reqBody = $("#promoRequests");
+    reqBody.innerHTML = "";
+    pending.forEach((p) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><img class="promo-thumb" src="${esc(p.image_url)}" alt=""></td>
+        <td>${esc(p.name)}<br><a href="${esc(p.link_url)}" target="_blank" rel="noopener" style="font-size:11px;color:#94a3b8">${esc(p.link_url)}</a></td>`;
+      const td = document.createElement("td");
+      td.className = "row-actions";
+      td.append(
+        actionBtn("primary mini", "Approve", () => patchPromo(p.id, { status: "approved" })),
+        actionBtn("subtle mini", "Reject", () => patchPromo(p.id, { status: "rejected" })),
+        actionBtn("subtle mini", "Delete", () => deletePromo(p.id))
+      );
+      tr.appendChild(td);
+      reqBody.appendChild(tr);
+    });
+
+    const rows = $("#promoRows");
+    rows.innerHTML = "";
+    active.forEach((p) => {
+      const tr = document.createElement("tr");
+      const ctr = p.ctr == null ? "—" : (p.ctr * 100).toFixed(1) + "%";
+      tr.innerHTML = `
+        <td><img class="promo-thumb" src="${esc(p.image_url)}" alt=""></td>
+        <td>${esc(p.name)}</td>
+        <td><input type="checkbox" ${p.enabled ? "checked" : ""}></td>
+        <td><input type="number" min="1" max="100" value="${p.weight}"></td>
+        <td class="stat">${p.impressions}</td>
+        <td class="stat">${p.clicks}</td>
+        <td class="stat">${ctr}</td>`;
+      tr.querySelector('input[type="checkbox"]').addEventListener("change", (e) =>
+        patchPromo(p.id, { enabled: e.target.checked }, true));
+      tr.querySelector('input[type="number"]').addEventListener("change", (e) =>
+        patchPromo(p.id, { weight: Number(e.target.value) }, true));
+      const td = document.createElement("td");
+      td.className = "row-actions";
+      td.append(
+        actionBtn("subtle mini", "Edit", () => startEdit(p)),
+        actionBtn("subtle mini", "Reset", () => patchPromo(p.id, { reset_stats: true })),
+        actionBtn("subtle mini", "Delete", () => deletePromo(p.id))
+      );
+      tr.appendChild(td);
+      rows.appendChild(tr);
+    });
+  }
+
+  async function patchPromo(id, body, silent) {
+    const res = await api(`/api/admin/promos/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || `Failed: ${res.status}`); }
+    if (!silent || !res.ok) loadPromos();
+  }
+
+  async function deletePromo(id) {
+    if (!confirm("Delete this promo permanently?")) return;
+    const res = await api(`/api/admin/promos/${id}`, { method: "DELETE" });
+    if (res.ok) loadPromos(); else alert(`Failed: ${res.status}`);
+  }
+
+  function startEdit(p) {
+    editingId = p.id;
+    $("#promoFormTitle").textContent = `Edit: ${p.name}`;
+    $("#pfName").value = p.name;
+    $("#pfImage").value = p.image_url;
+    $("#pfLink").value = p.link_url;
+    $("#pfWeight").value = p.weight;
+    $("#pfSave").textContent = "Save changes";
+    $("#pfCancel").hidden = false;
+    $("#pfName").scrollIntoView({ block: "center" });
+  }
+
+  function resetForm() {
+    editingId = null;
+    $("#promoFormTitle").textContent = "Add a promo";
+    ["#pfName", "#pfImage", "#pfLink"].forEach((s) => ($(s).value = ""));
+    $("#pfWeight").value = 1;
+    $("#pfResult").textContent = "";
+    $("#pfSave").textContent = "Add promo";
+    $("#pfCancel").hidden = true;
+  }
+
+  $("#pfCancel").addEventListener("click", resetForm);
+
+  $("#pfSave").addEventListener("click", async () => {
+    const payload = {
+      name: $("#pfName").value.trim(),
+      image_url: $("#pfImage").value.trim(),
+      link_url: $("#pfLink").value.trim(),
+      weight: Number($("#pfWeight").value) || 1,
+    };
+    $("#pfResult").textContent = "Saving…";
+    const res = editingId
+      ? await api(`/api/admin/promos/${editingId}`, { method: "PATCH", body: JSON.stringify(payload) })
+      : await api("/api/admin/promos", { method: "POST", body: JSON.stringify(payload) });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) { resetForm(); loadPromos(); }
+    else $("#pfResult").textContent = data.error || `Error ${res.status}`;
+  });
+
+  function actionBtn(cls, label, fn) {
+    const b = document.createElement("button");
+    b.className = cls; b.textContent = label; b.addEventListener("click", fn);
+    return b;
+  }
+
+  function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
-  if (tokenInput.value) loadQueue();
+  // auto-unlock if a token is already saved
+  if (tokenInput.value) $("#authForm").requestSubmit();
+})();
 </script>
 
 </body>

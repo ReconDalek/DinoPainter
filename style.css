@@ -662,9 +662,9 @@ button.primary:hover {
 }
 
 
-/* ---------- Share-to-gallery modal ---------- */
+/* ---------- Modal (share-to-gallery, advertise request) ---------- */
 
-.share-overlay {
+.modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(2, 6, 23, 0.7);
@@ -675,11 +675,11 @@ button.primary:hover {
   z-index: 50;
 }
 
-.share-overlay.hidden {
+.modal-overlay.hidden {
   display: none;
 }
 
-.share-modal {
+.modal-box {
   background: #1e293b;
   border: 1px solid #334155;
   border-radius: 12px;
@@ -692,31 +692,31 @@ button.primary:hover {
 }
 
 /* Stop the page behind the modal from scrolling. */
-body.share-open {
+body.modal-open {
   overflow: hidden;
 }
 
-.share-modal h3 {
+.modal-box h3 {
   margin: 0 0 8px;
 }
 
-.share-note {
+.modal-note {
   font-size: 12px;
   color: #94a3b8;
   margin: 0 0 14px;
 }
 
-.share-modal label {
+.modal-box label {
   display: block;
   font-size: 13px;
   margin-bottom: 10px;
 }
 
-.share-optional {
+.modal-optional {
   color: #64748b;
 }
 
-.share-modal input {
+.modal-box input {
   width: 100%;
   margin-top: 4px;
   padding: 7px 8px;
@@ -727,7 +727,7 @@ body.share-open {
   box-sizing: border-box;
 }
 
-.share-result {
+.modal-result {
   min-height: 18px;
   font-size: 13px;
   color: #cbd5e1;

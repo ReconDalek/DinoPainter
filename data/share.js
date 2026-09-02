@@ -14,21 +14,21 @@ let _shareModal = null;
 
 function _buildShareModal() {
   const overlay = document.createElement("div");
-  overlay.className = "share-overlay hidden";
+  overlay.className = "modal-overlay hidden";
   overlay.innerHTML = `
-    <div class="share-modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
       <h3 id="shareModalTitle">Share this design</h3>
-      <p class="share-note">
+      <p class="modal-note">
         Submissions are reviewed before they appear in the public gallery.
         Only the creature and its colours are stored — no personal data.
       </p>
-      <label>Design name <span class="share-optional">(optional)</span>
+      <label>Design name <span class="modal-optional">(optional)</span>
         <input type="text" id="shareTitle" maxlength="40" placeholder="e.g. Molten Rex">
       </label>
-      <label>Credit as <span class="share-optional">(optional)</span>
+      <label>Credit as <span class="modal-optional">(optional)</span>
         <input type="text" id="shareCredit" maxlength="24" placeholder="your name / tag">
       </label>
-      <div id="shareResult" class="share-result"></div>
+      <div id="shareResult" class="modal-result"></div>
       <div class="button-row">
         <button class="subtle" id="shareCancel">Cancel</button>
         <button class="primary" id="shareSubmit">Submit</button>
@@ -50,7 +50,7 @@ function _buildShareModal() {
 
 function _closeShareModal() {
   if (_shareModal) _shareModal.classList.add("hidden");
-  document.body.classList.remove("share-open");
+  document.body.classList.remove("modal-open");
 }
 
 async function _doSubmit() {
@@ -89,5 +89,5 @@ function shareToGallery() {
   _shareModal.querySelector("#shareTitle").value = "";
   _shareModal.querySelector("#shareCredit").value = "";
   _shareModal.classList.remove("hidden");
-  document.body.classList.add("share-open");
+  document.body.classList.add("modal-open");
 }

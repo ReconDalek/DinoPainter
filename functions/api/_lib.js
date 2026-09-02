@@ -81,6 +81,103 @@ export function validateSubmission(body) {
   };
 }
 
+export const MAX_PROMO_NAME = 40;
+export const MAX_URL = 500;
+export const PROMO_REQUESTS_PER_DAY = 3;
+
+function isSafeImageUrl(v) {
+  if (typeof v !== "string" || v.length > MAX_URL) return false;
+  if (/\s/.test(v)) return false;
+  return v.startsWith("/promos/") || /^https:\/\/[^ ]+$/i.test(v);
+}
+
+function isSafeLinkUrl(v) {
+  return typeof v === "string" && v.length <= MAX_URL && /^https:\/\/[^ ]+$/i.test(v);
+}
+
+export function slugId(name) {
+  const base = String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 24) || "promo";
+  const suffix = [...crypto.getRandomValues(new Uint8Array(3))]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `${base}-${suffix}`;
+}
+
+// Validate a promo create/update body.
+// opts.partial = true allows any subset of fields (for PATCH).
+// Returns { ok, value } | { ok:false, error }.
+export function validatePromo(body, opts = {}) {
+  if (!body || typeof body !== "object") return { ok: false, error: "Invalid body." };
+  const partial = !!opts.partial;
+  const out = {};
+
+  const need = (field) => !partial || field in body;
+
+  if (need("name")) {
+    const name = typeof body.name === "string" ? body.name.replace(/<[^>]*>/g, "").trim() : "";
+    if (!name) return { ok: false, error: "Name is required." };
+    out.name = name.slice(0, MAX_PROMO_NAME);
+  }
+  if (need("image_url")) {
+    if (!isSafeImageUrl(body.image_url)) {
+      return { ok: false, error: "Image must be a /promos/… path or an https:// URL." };
+    }
+    out.image_url = body.image_url;
+  }
+  if (need("link_url")) {
+    if (!isSafeLinkUrl(body.link_url)) return { ok: false, error: "Link must be an https:// URL." };
+    out.link_url = body.link_url;
+  }
+  if ("weight" in body) {
+    const w = Number(body.weight);
+    if (!Number.isInteger(w) || w < 1 || w > 100) return { ok: false, error: "Weight must be 1–100." };
+    out.weight = w;
+  }
+  if ("enabled" in body) out.enabled = body.enabled ? 1 : 0;
+  if ("status" in body) {
+    if (!["pending", "approved", "rejected"].includes(body.status)) {
+      return { ok: false, error: "Bad status." };
+    }
+    out.status = body.status;
+  }
+
+  if (!partial && Object.keys(out).length < 3) {
+    return { ok: false, error: "name, image_url and link_url are required." };
+  }
+  return { ok: true, value: out };
+}
+
+export function publicPromo(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    image_url: row.image_url,
+    link_url: row.link_url,
+    weight: row.weight || 1,
+  };
+}
+
+export function adminPromo(row) {
+  const ctr = row.impressions > 0 ? row.clicks / row.impressions : null;
+  return {
+    id: row.id,
+    name: row.name,
+    image_url: row.image_url,
+    link_url: row.link_url,
+    enabled: !!row.enabled,
+    weight: row.weight || 1,
+    status: row.status,
+    impressions: row.impressions,
+    clicks: row.clicks,
+    ctr,
+    created_at: row.created_at,
+  };
+}
+
 // Returns null when authorised, or a 401 Response when not.
 export function requireAdmin(request, env) {
   const header = request.headers.get("Authorization") || "";
