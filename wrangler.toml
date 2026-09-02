@@ -8,7 +8,7 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "dinopainter"
-database_id = "48ac7e16-8aab-4772-b624-8a7d1c230207"
+database_id = "8d266c6a-4ac2-4264-8448-ce0b6c2c6642"
 
 # Secrets (do NOT put values here) — set them with:
 #   npx wrangler pages secret put IP_SALT
