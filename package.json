@@ -1,0 +1,14 @@
+{
+  "name": "dinopainter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/gen-dino-keys.mjs",
+    "dev": "wrangler pages dev . --d1 DB=dinopainter",
+    "migrate:local": "wrangler d1 migrations apply dinopainter --local",
+    "migrate:remote": "wrangler d1 migrations apply dinopainter --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}

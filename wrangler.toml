@@ -1,0 +1,19 @@
+# Cloudflare Pages configuration.
+# The static site is served from the repo root; API code lives in functions/.
+name = "dinopainter"
+compatibility_date = "2025-09-01"
+pages_build_output_dir = "."
+
+# D1 database binding. Create the database once with:
+#   npx wrangler d1 create dinopainter
+# then paste the returned database_id below (and in the Pages dashboard binding).
+[[d1_databases]]
+binding = "DB"
+database_name = "dinopainter"
+database_id = "REPLACE_WITH_DATABASE_ID"
+
+# Secrets (do NOT put values here) — set them with:
+#   npx wrangler pages secret put IP_SALT
+#   npx wrangler pages secret put ADMIN_TOKEN
+# IP_SALT     - any long random string; salts hashed IPs used for rate limiting
+# ADMIN_TOKEN - long random string; bearer token for /api/admin/* and admin.html

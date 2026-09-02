@@ -55,7 +55,7 @@
     </div>
     <div class="button-row">
     <button class="subtle" id="resetPreset"><span class="emoji">⟲ </span>Reset</button>
-    <!-- <button class="subtle" onclick="copyShareLink()"><span class="emoji">🔗 </span>Share</button> -->
+    <button class="subtle" onclick="shareToGallery()"><span class="emoji">📤 </span>Share to Gallery</button>
     </div>
   </div>
 
@@ -150,15 +150,18 @@
   <div class="ad-rail-slot"></div>
 </div>
 
+<script src="/data/config.js"></script>
 <script src="/data/colors.js"></script>
 <script src="/data/dinos.js"></script>
 <script src="/data/presets.js"></script>
 <script src="/data/preview.js"></script>
 <script src="/data/gallery.js"></script>
+<script src="/data/remote-gallery.js"></script>
 <script src="/data/gallery-ui.js"></script>
 <script src="/ads/ads.js"></script>
 <script src="/ads/ads-manager.js"></script>
 <script src="/script.js"></script>
+<script src="/data/share.js"></script>
 <script>
   renderGalleryCarousel("galleryCarousel", 4);
 </script>

@@ -72,18 +72,32 @@
 <script src="/data/dinos.js"></script>
 <script src="/data/presets.js"></script>
 <script src="/data/preview.js"></script>
+<script src="/data/config.js"></script>
 <script src="/data/gallery.js"></script>
+<script src="/data/remote-gallery.js"></script>
 <script src="/data/gallery-ui.js"></script>
 <script src="/ads/ads.js"></script>
 <script src="/ads/ads-manager.js"></script>
 <script>
-  (function () {
+  (async function () {
     const params = new URLSearchParams(location.search);
     let entry = null;
 
     const id = params.get("id");
     if (id) {
       entry = galleryEntryById(id);
+      // Not in the curated seed — try the community API.
+      if (!entry && typeof fetchRemoteDesign === "function") {
+        const remote = await fetchRemoteDesign(id);
+        if (remote) {
+          entry = registerEntry({
+            ...remote,
+            title: remote.title || `${DINOS[remote.dino]?.name || remote.dino} colour scheme`,
+            blurb: "",
+            credit: remote.credit || "Community"
+          });
+        }
+      }
     }
 
     // Fall back to a design described directly in the URL (a shared link).

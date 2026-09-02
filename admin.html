@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Gallery Moderation - ARK Dino Painter</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<div class="app app-wide">
+  <h1>Gallery Moderation</h1>
+
+  <div class="card" id="authCard">
+    <label>Admin token
+      <input type="password" id="tokenInput" placeholder="ADMIN_TOKEN" style="width:100%;margin-top:6px;padding:8px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;box-sizing:border-box;">
+    </label>
+    <div class="button-row">
+      <button class="primary" id="loadBtn">Load pending</button>
+    </div>
+    <p id="authMsg" class="design-regions"></p>
+  </div>
+
+  <div id="queue" class="gallery-grid"></div>
+</div>
+
+<script src="/data/config.js"></script>
+<script src="/data/colors.js"></script>
+<script src="/data/dinos.js"></script>
+<script src="/data/presets.js"></script>
+<script src="/data/preview.js"></script>
+<script src="/data/gallery.js"></script>
+<script src="/data/remote-gallery.js"></script>
+<script src="/data/gallery-ui.js"></script>
+<script>
+  const tokenInput = document.getElementById("tokenInput");
+  const authMsg = document.getElementById("authMsg");
+  tokenInput.value = sessionStorage.getItem("adminToken") || "";
+
+  document.getElementById("loadBtn").addEventListener("click", loadQueue);
+
+  async function api(path, opts = {}) {
+    return fetch(`${API_BASE}${path}`, {
+      ...opts,
+      headers: {
+        "content-type": "application/json",
+        Authorization: `Bearer ${tokenInput.value.trim()}`,
+        ...(opts.headers || {}),
+      },
+    });
+  }
+
+  async function loadQueue() {
+    authMsg.textContent = "Loading…";
+    sessionStorage.setItem("adminToken", tokenInput.value.trim());
+    const res = await api("/api/admin/pending");
+    if (res.status === 401) {
+      authMsg.textContent = "Bad token.";
+      return;
+    }
+    if (!res.ok) {
+      authMsg.textContent = `Error ${res.status}`;
+      return;
+    }
+    const { designs } = await res.json();
+    authMsg.textContent = `${designs.length} pending`;
+
+    const queue = document.getElementById("queue");
+    queue.innerHTML = "";
+    designs.forEach((d) => queue.appendChild(renderReviewCard(d)));
+  }
+
+  function renderReviewCard(d) {
+    const dino = DINOS[d.dino];
+    const colors = resolveEntryColors(d, dino);
+
+    const card = document.createElement("div");
+    card.className = "gallery-card";
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    canvas.className = "gallery-card-canvas";
+    const hexMap = {};
+    Object.entries(colors).forEach(([r, c]) => (hexMap[r] = c.hex));
+    paintDino(canvas, dino, hexMap);
+
+    const body = document.createElement("div");
+    body.className = "gallery-card-body";
+    body.innerHTML = `
+      <div class="gallery-card-title">${escapeHtml(d.title || "(untitled)")}</div>
+      <div class="gallery-card-sub">${dino ? dino.name : d.dino} · ${escapeHtml(d.credit || "no credit")}</div>`;
+    body.appendChild(renderSwatchStrip(colors));
+
+    const row = document.createElement("div");
+    row.className = "button-row";
+    const approve = document.createElement("button");
+    approve.className = "primary";
+    approve.textContent = "Approve";
+    const reject = document.createElement("button");
+    reject.className = "subtle";
+    reject.textContent = "Reject";
+    approve.onclick = () => moderate(d.id, "approve", card);
+    reject.onclick = () => moderate(d.id, "reject", card);
+    row.appendChild(approve);
+    row.appendChild(reject);
+    body.appendChild(row);
+
+    card.appendChild(canvas);
+    card.appendChild(body);
+    return card;
+  }
+
+  async function moderate(id, action, card) {
+    const res = await api(`/api/admin/designs/${id}`, {
+      method: "POST",
+      body: JSON.stringify({ action }),
+    });
+    if (res.ok) {
+      card.style.opacity = "0.35";
+      card.querySelectorAll("button").forEach((b) => (b.disabled = true));
+    } else {
+      alert(`Failed: ${res.status}`);
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  if (tokenInput.value) loadQueue();
+</script>
+
+</body>
+</html>
