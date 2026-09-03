@@ -157,7 +157,7 @@ const DINOS = {
 	aberrant_oviraptor: {
 		name: "Aberrant Oviraptor",
 		folder: "aberrant_oviraptor",
-		regions: [0, 1, 2, 4, 5]
+		regions: [0]
 	},
 	aberrant_ovis: {
 		name: "Aberrant Ovis",
@@ -502,7 +502,7 @@ const DINOS = {
 	dreadnoughtus: {
 		name: "Dreadnoughtus",
 		folder: "dreadnoughtus",
-		regions: [0, 1, 4, 5]
+		regions: [1, 4, 5]
 	},
 	dung_beetle: {
 		name: "Dung Beetle",
@@ -769,11 +769,6 @@ const DINOS = {
 		folder: "megatherium",
 		regions: [0, 5]
 	},
-	mesopithecus: {
-		name: "Mesopithecus",
-		folder: "mesopithecus",
-		regions: [0, 2, 4, 5]
-	},
 	microraptor: {
 		name: "Microraptor",
 		folder: "microraptor",
@@ -825,8 +820,8 @@ const DINOS = {
 		regions: [0, 4, 5]
 	},
 	ovis_female: {
-		name: "Aberrant Ovis (female)",
-		folder: "aberrant_ovis_(female)",
+		name: "Ovis (female)",
+		folder: "ovis_(female)",
 		regions: [0, 4, 5]
 	},
 	pachy: {
@@ -978,6 +973,11 @@ const DINOS = {
 		name: "Sarco",
 		folder: "sarco",
 		regions: [0, 2, 3, 4, 5]
+	},
+	shastasaurus: {
+		name: "Shastasaurus",
+		folder: "shastasaurus",
+		regions: [0, 2, 4, 5]
 	},
 	shinehorn: {
 		name: "Shinehorn",
