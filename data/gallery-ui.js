@@ -126,33 +126,62 @@ function isRenderable(entry) {
   return entry && DINOS[entry.dino];
 }
 
-// Full grid: community-approved designs first (newest), then the curated seed.
+// Community-approved designs first (newest), then any curated seed entries.
+async function galleryPool() {
+  const seed = GALLERY.filter(isRenderable);
+  let remote = [];
+  if (typeof fetchRemoteDesigns === "function") {
+    remote = (await fetchRemoteDesigns(60)).filter(isRenderable);
+  }
+  return mergeDesigns(remote, seed);
+}
+
+// Full grid. Shows the element with id `${containerId}Empty` (if present) when
+// there's nothing to display yet.
 async function renderGalleryGrid(containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  const seed = GALLERY.filter(isRenderable);
-  seed.forEach((entry) => el.appendChild(renderGalleryCard(entry)));
+  const pool = await galleryPool();
+  const empty = document.getElementById(containerId + "Empty");
 
-  if (typeof fetchRemoteDesigns !== "function") return;
-  const remote = (await fetchRemoteDesigns(60)).filter(isRenderable);
-  const fresh = mergeDesigns(remote, seed).filter((e) => !seed.includes(e));
-  fresh.forEach((entry) => el.insertBefore(renderGalleryCard(entry), el.firstChild));
+  if (!pool.length) {
+    if (empty) empty.hidden = false;
+    return;
+  }
+  if (empty) empty.hidden = true;
+  pool.forEach((entry) => el.appendChild(renderGalleryCard(entry)));
 }
 
-// Small rotating strip of N random designs, mixing community + curated.
+// Small rotating strip of N random designs. Hides the enclosing .community-card
+// (or the container itself) when there's nothing to show.
 async function renderGalleryCarousel(containerId, count) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  count = count || 4;
 
-  let pool = GALLERY.filter(isRenderable);
-  if (typeof fetchRemoteDesigns === "function") {
-    const remote = (await fetchRemoteDesigns(30)).filter(isRenderable);
-    pool = mergeDesigns(remote, pool);
+  const pool = await galleryPool();
+  if (!pool.length) {
+    (el.closest(".community-card") || el).hidden = true;
+    return;
   }
   pool
     .sort(() => Math.random() - 0.5)
-    .slice(0, count)
+    .slice(0, count || 4)
+    .forEach((entry) => el.appendChild(renderGalleryCard(entry)));
+}
+
+// "More designs" strip for a design page: random others from the pool.
+async function renderRelatedDesigns(containerId, excludeId, count) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  const pool = (await galleryPool()).filter((e) => e.id !== excludeId);
+  if (!pool.length) {
+    (el.closest(".card") || el).hidden = true;
+    return;
+  }
+  pool
+    .sort(() => Math.random() - 0.5)
+    .slice(0, count || 6)
     .forEach((entry) => el.appendChild(renderGalleryCard(entry)));
 }

@@ -168,11 +168,7 @@
     document.getElementById("openInPainter").href = buildPainterUrl(entry);
 
     // --- Related designs ---
-    const related = GALLERY.filter((e) => e.id !== entry.id)
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 6);
-    const grid = document.getElementById("relatedGrid");
-    related.forEach((e) => grid.appendChild(renderGalleryCard(e)));
+    renderRelatedDesigns("relatedGrid", entry.id, 6);
 
     // --- Structured data ---
     const ld = document.createElement("script");
