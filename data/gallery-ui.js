@@ -89,16 +89,22 @@ function renderGalleryCard(entry) {
   const body = document.createElement("div");
   body.className = "gallery-card-body";
 
+  const dinoName = dino ? dino.name : entry.dino;
+
   const h = document.createElement("div");
   h.className = "gallery-card-title";
-  h.textContent = entry.title;
+  h.textContent = entry.title || dinoName;
+
+  const meta = [];
+  if (entry.title) meta.push(dinoName);
+  if (entry.credit) meta.push(`by ${entry.credit}`);
 
   const sub = document.createElement("div");
   sub.className = "gallery-card-sub";
-  sub.textContent = dino ? dino.name : entry.dino;
+  sub.textContent = meta.join(" · ");
 
   body.appendChild(h);
-  body.appendChild(sub);
+  if (meta.length) body.appendChild(sub);
   body.appendChild(renderSwatchStrip(colors));
 
   card.appendChild(canvas);

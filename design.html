@@ -16,6 +16,7 @@
 
 <div class="app">
   <h1 id="designTitle">Creature Colour Design</h1>
+  <p id="designCredit" class="design-credit" hidden></p>
 
   <div class="card canvas-card">
     <div id="designDino" class="dino-title"></div>
@@ -94,7 +95,7 @@
             ...remote,
             title: remote.title || `${DINOS[remote.dino]?.name || remote.dino} colour scheme`,
             blurb: "",
-            credit: remote.credit || "Community"
+            credit: remote.credit || null
           });
         }
       }
@@ -115,7 +116,7 @@
           title: `${DINOS[dinoKey].name} colour scheme`,
           colors,
           blurb: "",
-          credit: "Community"
+          credit: null
         };
       }
     }
@@ -134,10 +135,18 @@
     const command = buildColourCommand(entry);
 
     // --- Text content ---
-    const titleText = `${entry.title} — ${dino.name} colour scheme`;
+    const autoTitle = `${dino.name} colour scheme`;
+    const named = !!entry.title && entry.title !== autoTitle;
+    const titleText = named ? `${entry.title} — ${autoTitle}` : autoTitle;
     document.title = `${titleText} | ARK Dino Painter`;
     document.getElementById("designTitle").textContent = entry.title;
     document.getElementById("designDino").textContent = dino.name;
+
+    if (entry.credit) {
+      const creditEl = document.getElementById("designCredit");
+      creditEl.textContent = `Submitted by ${entry.credit}`;
+      creditEl.hidden = false;
+    }
 
     const blurb =
       (entry.blurb ? entry.blurb + " " : "") +
@@ -179,7 +188,9 @@
       name: titleText,
       description: metaDesc,
       about: `ARK ${dino.name} colour regions`,
-      creator: { "@type": "Organization", name: entry.credit || "ARK Dino Painter" }
+      creator: entry.credit
+        ? { "@type": "Person", name: entry.credit }
+        : { "@type": "Organization", name: "ARK Dino Painter" }
     });
     document.head.appendChild(ld);
   })();

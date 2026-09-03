@@ -635,6 +635,13 @@ button.primary:hover {
   font-size: 13px;
 }
 
+.design-credit {
+  margin: -8px 0 16px;
+  color: #94a3b8;
+  font-size: 14px;
+  text-align: center;
+}
+
 /* Anchors that should look like the .primary / .subtle buttons */
 .button-link {
   display: inline-block;
