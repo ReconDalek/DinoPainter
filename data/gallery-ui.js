@@ -67,25 +67,6 @@ function renderSwatchStrip(colors) {
   return strip;
 }
 
-// Paint a card's canvas only once it scrolls near the viewport.
-const _lazyPainter = new IntersectionObserver(
-  (entries, obs) => {
-    entries.forEach((e) => {
-      if (!e.isIntersecting) return;
-      const canvas = e.target;
-      obs.unobserve(canvas);
-      const entry = galleryEntryById(canvas.dataset.entryId);
-      if (!entry) return;
-      const dino = DINOS[entry.dino];
-      const colors = resolveEntryColors(entry, dino);
-      const hexMap = {};
-      Object.entries(colors).forEach(([r, c]) => (hexMap[r] = c.hex));
-      paintDino(canvas, dino, hexMap);
-    });
-  },
-  { rootMargin: "300px" }
-);
-
 function renderGalleryCard(entry) {
   registerEntry(entry);
   const dino = DINOS[entry.dino];
@@ -100,7 +81,10 @@ function renderGalleryCard(entry) {
   canvas.height = 256;
   canvas.className = "gallery-card-canvas";
   canvas.dataset.entryId = entry.id;
-  _lazyPainter.observe(canvas);
+
+  const hexMap = {};
+  Object.entries(colors).forEach(([r, c]) => (hexMap[r] = c.hex));
+  paintDino(canvas, dino, hexMap);
 
   const body = document.createElement("div");
   body.className = "gallery-card-body";
