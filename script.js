@@ -110,7 +110,9 @@ function applyPresetById(presetName) {
   const preset = PRESETS[presetName];
   currentDino.regions.forEach((region, index) => {
     const select = document.getElementById(`region-${region}`);
-    const colorId = preset[index % preset.length];
+    // Slot N of a preset maps to region N. Fall back to positional cycling only
+    // for presets shorter than the region count (built-ins are all length 6).
+    const colorId = preset[region] ?? preset[index % preset.length];
     const colorObj = COLORS.find(c => c.id == colorId);
     if (!colorObj) return;
 

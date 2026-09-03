@@ -73,15 +73,17 @@
   // ---- submission modal ----
   let modal = null;
 
+  // 6-slot array indexed by region number (0-5). Regions that are unset or
+  // disabled on the current creature come back as null so slot positions stay
+  // aligned with the region they belong to.
   function currentRegionColorIds() {
-    const ids = [];
-    if (typeof regionState === "object") {
-      Object.values(regionState).forEach((hex) => {
-        const c = COLORS.find((x) => x.hex === hex);
-        if (c) ids.push(c.id);
-      });
+    const out = [];
+    for (let r = 0; r < N; r++) {
+      const hex = typeof regionState === "object" && regionState ? regionState[r] : null;
+      const c = hex ? COLORS.find((x) => x.hex === hex) : null;
+      out[r] = c ? c.id : null;
     }
-    return ids;
+    return out;
   }
 
   function buildModal() {
@@ -123,9 +125,11 @@
     overlay.querySelector("#palCancel").addEventListener("click", close);
     overlay.querySelector("#palSend").addEventListener("click", send);
 
-    // prefill from the current design (cycled) and colour each select as a preview
+    // prefill slot i from region i; gaps (disabled/unset regions) fall back to
+    // the first real colour so the user has a sane starting point to edit
+    const firstColour = prefill.find((x) => x) || 1;
     overlay.querySelectorAll("select[data-slot]").forEach((sel, i) => {
-      if (prefill.length) sel.value = prefill[i % prefill.length];
+      sel.value = prefill[i] ?? firstColour;
       const paint = () => {
         const c = COLORS.find((x) => x.id == sel.value);
         if (!c) return;
