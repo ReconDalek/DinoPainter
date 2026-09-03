@@ -73,36 +73,79 @@
   // ---- submission modal ----
   let modal = null;
 
-  // 6-slot array indexed by region number (0-5). Regions that are unset or
-  // disabled on the current creature come back as null so slot positions stay
-  // aligned with the region they belong to.
-  function currentRegionColorIds() {
-    const out = [];
+  // Colour id currently on region r, or null if that region is unset/disabled.
+  function regionColorId(r) {
+    const state = typeof regionState === "object" && regionState ? regionState : {};
+    const hex = state[r] != null ? state[r] : null;
+    const c = hex ? COLORS.find((x) => x.hex === hex) : null;
+    return c ? c.id : null;
+  }
+
+  function activeRegions() {
+    const d = typeof currentDino === "object" ? currentDino : null;
+    return d && Array.isArray(d.regions) ? d.regions : [0, 1, 2, 3, 4, 5];
+  }
+
+  function paintSelect(sel) {
+    const c = COLORS.find((x) => x.id == sel.value);
+    if (!c) return;
+    const { r, g, b } = hexToRgb(c.hex);
+    sel.style.background = c.hex;
+    sel.style.color = (r * 299 + g * 587 + b * 114) / 1000 > 140 ? "#000" : "#fff";
+  }
+
+  // Read the painter's current state into the modal every time it opens.
+  function refreshModal() {
+    const active = activeRegions();
+    const dinoName = (typeof currentDino === "object" && currentDino && currentDino.name) || "this creature";
+
+    // first real colour on the creature — the default for unset/disabled slots
+    let carry = 18; // white
     for (let r = 0; r < N; r++) {
-      const hex = typeof regionState === "object" && regionState ? regionState[r] : null;
-      const c = hex ? COLORS.find((x) => x.hex === hex) : null;
-      out[r] = c ? c.id : null;
+      const id = regionColorId(r);
+      if (id) { carry = id; break; }
     }
-    return out;
+
+    modal.querySelectorAll(".pal-row").forEach((row, r) => {
+      const own = regionColorId(r);
+      if (own) carry = own;
+
+      const sel = row.querySelector("select");
+      sel.value = own != null ? own : carry;
+      paintSelect(sel);
+
+      const disabled = !active.includes(r);
+      row.style.opacity = disabled ? "0.5" : "1";
+      row.querySelector(".pal-hint").textContent = disabled
+        ? `disabled on ${dinoName}`
+        : own != null
+        ? "detected"
+        : "";
+    });
   }
 
   function buildModal() {
     const overlay = document.createElement("div");
     overlay.className = "modal-overlay hidden";
 
-    const prefill = currentRegionColorIds();
     const options = COLORS.map((c) => `<option value="${c.id}">${c.id} · ${c.name}</option>`).join("");
-    let selects = "";
+    let rows = "";
     for (let i = 0; i < N; i++) {
-      selects += `<select data-slot="${i}" style="width:100%;padding:6px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;">${options}</select>`;
+      rows += `
+        <div class="pal-row" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="width:64px;flex:none;font-size:12px;color:#94a3b8;">Region ${i}</span>
+          <select data-slot="${i}" style="flex:1;min-width:0;padding:6px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;">${options}</select>
+          <span class="pal-hint" style="width:88px;flex:none;font-size:10px;color:#64748b;text-align:right;"></span>
+        </div>`;
     }
 
     overlay.innerHTML = `
       <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="paletteModalTitle">
         <h3 id="paletteModalTitle">Submit a palette</h3>
         <p class="modal-note">
-          Reviewed before it appears in the Presets list. Six colours, applied
-          across a creature's regions in order.
+          Reviewed before it appears in the Presets list. Slot N applies to
+          region N. Disabled regions are dimmed but you can still set a colour
+          for them.
         </p>
         <label>Palette name
           <input type="text" id="palName" maxlength="30" placeholder="e.g. Coral Reef">
@@ -110,7 +153,7 @@
         <label>Credit as <span class="modal-optional">(optional)</span>
           <input type="text" id="palCredit" maxlength="24" placeholder="your name / tag">
         </label>
-        <div id="palSwatches" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">${selects}</div>
+        <div style="margin:10px 0;">${rows}</div>
         <div id="palResult" class="modal-result"></div>
         <div class="button-row">
           <button class="subtle" id="palCancel">Cancel</button>
@@ -124,21 +167,11 @@
     });
     overlay.querySelector("#palCancel").addEventListener("click", close);
     overlay.querySelector("#palSend").addEventListener("click", send);
-
-    // prefill slot i from region i; gaps (disabled/unset regions) fall back to
-    // the first real colour so the user has a sane starting point to edit
-    const firstColour = prefill.find((x) => x) || 1;
-    overlay.querySelectorAll("select[data-slot]").forEach((sel, i) => {
-      sel.value = prefill[i] ?? firstColour;
-      const paint = () => {
-        const c = COLORS.find((x) => x.id == sel.value);
-        if (!c) return;
-        const { r, g, b } = hexToRgb(c.hex);
-        sel.style.background = c.hex;
-        sel.style.color = (r * 299 + g * 587 + b * 114) / 1000 > 140 ? "#000" : "#fff";
-      };
-      sel.addEventListener("change", paint);
-      paint();
+    overlay.querySelectorAll("select[data-slot]").forEach((sel) => {
+      sel.addEventListener("change", () => {
+        paintSelect(sel);
+        sel.closest(".pal-row").querySelector(".pal-hint").textContent = "";
+      });
     });
 
     document.body.appendChild(overlay);
@@ -182,6 +215,7 @@
   window.openPaletteSubmit = function () {
     if (!modal) modal = buildModal();
     modal.querySelector("#palResult").textContent = "";
+    refreshModal(); // re-read the painter's current colours every time
     modal.classList.remove("hidden");
     document.body.classList.add("modal-open");
   };
