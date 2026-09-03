@@ -151,6 +151,67 @@ export function validatePromo(body, opts = {}) {
   return { ok: true, value: out };
 }
 
+export const MAX_PALETTE_NAME = 30;
+export const PALETTE_COLORS = 6;
+export const PALETTE_SUBMISSIONS_PER_DAY = 5;
+
+// Validate a palette create/update body.
+// opts.partial = true for PATCH.
+export function validatePalette(body, opts = {}) {
+  if (!body || typeof body !== "object") return { ok: false, error: "Invalid body." };
+  const partial = !!opts.partial;
+  const out = {};
+
+  if (!partial || "name" in body) {
+    const name = typeof body.name === "string" ? body.name.replace(/<[^>]*>/g, "").trim() : "";
+    if (!name) return { ok: false, error: "Name is required." };
+    out.name = name.slice(0, MAX_PALETTE_NAME);
+  }
+  if (!partial || "colors" in body) {
+    const c = body.colors;
+    if (!Array.isArray(c) || c.length !== PALETTE_COLORS) {
+      return { ok: false, error: `Pick ${PALETTE_COLORS} colours.` };
+    }
+    const ids = c.map(Number);
+    if (ids.some((n) => !Number.isInteger(n) || n < 1 || n > 255)) {
+      return { ok: false, error: "Bad colour id." };
+    }
+    out.colors = ids;
+  }
+  if ("credit" in body) {
+    out.credit =
+      typeof body.credit === "string"
+        ? body.credit.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim().slice(0, MAX_CREDIT) || null
+        : null;
+  }
+  if ("status" in body) {
+    if (!["pending", "approved", "rejected"].includes(body.status)) {
+      return { ok: false, error: "Bad status." };
+    }
+    out.status = body.status;
+  }
+
+  if (!partial && (!out.name || !out.colors)) {
+    return { ok: false, error: "name and colors are required." };
+  }
+  return { ok: true, value: out };
+}
+
+export function publicPalette(row) {
+  return { id: row.id, name: row.name, colors: JSON.parse(row.colors), credit: row.credit || null };
+}
+
+export function adminPalette(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    colors: JSON.parse(row.colors),
+    credit: row.credit || null,
+    status: row.status,
+    created_at: row.created_at,
+  };
+}
+
 export function publicPromo(row) {
   return {
     id: row.id,

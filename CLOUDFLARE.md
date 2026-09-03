@@ -67,6 +67,10 @@ Two tabs:
   promos, toggle them on/off, set rotation weight, and see impressions, clicks and
   CTR per promo. Public "Advertise your server" requests land here as pending rows
   to approve or reject.
+- **Palettes** — community colour palettes shown under the built-in presets in the
+  painter. Approve / reject public "Submit a palette" requests, or add featured
+  ones directly. Built-in `PRESETS` stay in code; these are additive (0003 seeds a
+  few). Painter falls back to just the built-ins if the API is unreachable.
 
 `admin.html` is `noindex` and gated by the token. For extra safety you can also
 put **Cloudflare Access** (Zero Trust → free for small teams) in front of
@@ -100,7 +104,7 @@ npm run dev                         # http://localhost:8788
   1–255; promo URLs must be `/promos/…` or `https://…`; text stripped of HTML and
   length-capped.
 - Rate limits per hashed IP (raw IP never stored): 8 design submissions/hour,
-  3 promo requests/day.
+  3 promo requests/day, 5 palette submissions/day.
 - `POST /api/promos/:id/impression` and `/click` are unauthenticated counter
   bumps (one D1 write each). Fine at this scale; if traffic grows a lot, add a
   Cloudflare **Rate Limiting Rule** on `/api/promos/*/impression` in the

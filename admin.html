@@ -22,6 +22,10 @@
     .promo-form input { padding: 7px 8px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
     .row-actions { white-space: nowrap; display: flex; gap: 4px; }
     .scroll-x { overflow-x: auto; }
+    .pal-swatches { display: inline-flex; gap: 2px; vertical-align: middle; }
+    .pal-sw { width: 16px; height: 16px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.15); }
+    .pal-form select { padding: 6px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
+    .pal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   </style>
 </head>
 <body>
@@ -50,6 +54,7 @@
     <div class="admin-tabs">
       <button class="subtle admin-tab active" data-tab="submissions">Design submissions</button>
       <button class="subtle admin-tab" data-tab="promos">Promos</button>
+      <button class="subtle admin-tab" data-tab="palettes">Palettes</button>
     </div>
 
     <section id="tab-submissions">
@@ -92,6 +97,48 @@
         </div>
       </div>
     </section>
+
+    <section id="tab-palettes" hidden>
+      <div class="card">
+        <div class="headerlabel">Requests <span class="pill" id="palReqCount">0</span></div>
+        <div class="scroll-x"><table class="promo-table"><tbody id="palRequests"></tbody></table></div>
+        <p id="palReqEmpty" class="design-regions">No pending palette requests.</p>
+      </div>
+
+      <div class="card">
+        <div class="headerlabel">Published palettes</div>
+        <div class="scroll-x"><table class="promo-table">
+          <thead><tr><th>Colours</th><th>Name</th><th>Credit</th><th></th></tr></thead>
+          <tbody id="palRows"></tbody>
+        </table></div>
+      </div>
+
+      <div class="card">
+        <div class="headerlabel" id="palFormTitle">Add a palette</div>
+        <div class="promo-form">
+          <input type="text" id="paName" maxlength="30" placeholder="Palette name">
+          <input type="text" id="paCredit" maxlength="24" placeholder="Credit (optional)">
+          <div class="pal-grid pal-form" id="paSelects"></div>
+          <div id="paResult" class="design-regions"></div>
+          <div class="button-row">
+            <button class="primary" id="paSave">Add palette</button>
+            <button class="subtle" id="paCancel" hidden>Cancel edit</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="card site-nav">
+    <div class="site-nav-links">
+      <a href="index.html">Dino Painter</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="about.html">About</a>
+      <a href="how-to-use.html">How To Use</a>
+      <a href="faq.html">FAQ</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
   </div>
 </div>
 
@@ -148,8 +195,10 @@
   document.querySelectorAll(".admin-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".admin-tab").forEach((b) => b.classList.toggle("active", b === btn));
-      $("#tab-submissions").hidden = btn.dataset.tab !== "submissions";
-      $("#tab-promos").hidden = btn.dataset.tab !== "promos";
+      ["submissions", "promos", "palettes"].forEach((t) => {
+        $("#tab-" + t).hidden = btn.dataset.tab !== t;
+      });
+      if (btn.dataset.tab === "palettes") loadPalettes();
     });
   });
 
@@ -308,6 +357,142 @@
     if (res.ok) { resetForm(); loadPromos(); }
     else $("#pfResult").textContent = data.error || `Error ${res.status}`;
   });
+
+  // ---- palettes ----
+  let palEditingId = null;
+  const COLOR_OPTS = COLORS.map((c) => `<option value="${c.id}">${c.id} · ${c.name}</option>`).join("");
+
+  function buildPaletteSelects() {
+    const wrap = $("#paSelects");
+    if (wrap.children.length) return;
+    for (let i = 0; i < 6; i++) {
+      const sel = document.createElement("select");
+      sel.innerHTML = COLOR_OPTS;
+      sel.dataset.slot = i;
+      sel.addEventListener("change", () => paintSelect(sel));
+      paintSelect(sel);
+      wrap.appendChild(sel);
+    }
+  }
+
+  function paintSelect(sel) {
+    const c = COLORS.find((x) => x.id == sel.value);
+    if (!c) return;
+    const { r, g, b } = previewHexToRgb(c.hex);
+    sel.style.background = c.hex;
+    sel.style.color = (r * 299 + g * 587 + b * 114) / 1000 > 140 ? "#000" : "#fff";
+  }
+
+  function swatchRow(ids) {
+    const box = document.createElement("span");
+    box.className = "pal-swatches";
+    ids.forEach((id) => {
+      const c = COLORS.find((x) => x.id == id);
+      const sw = document.createElement("span");
+      sw.className = "pal-sw";
+      sw.style.background = c ? c.hex : "#000";
+      sw.title = c ? `${id} · ${c.name}` : id;
+      box.appendChild(sw);
+    });
+    return box;
+  }
+
+  async function loadPalettes() {
+    buildPaletteSelects();
+    const res = await api("/api/admin/palettes");
+    if (!res.ok) return;
+    const { palettes } = await res.json();
+    const pending = palettes.filter((p) => p.status === "pending");
+    const active = palettes.filter((p) => p.status === "approved");
+
+    $("#palReqCount").textContent = pending.length;
+    $("#palReqEmpty").hidden = pending.length > 0;
+    const reqBody = $("#palRequests");
+    reqBody.innerHTML = "";
+    pending.forEach((p) => {
+      const tr = document.createElement("tr");
+      const c1 = document.createElement("td"); c1.appendChild(swatchRow(p.colors));
+      const c2 = document.createElement("td"); c2.textContent = p.name + (p.credit ? ` · ${p.credit}` : "");
+      const c3 = document.createElement("td"); c3.className = "row-actions";
+      c3.append(
+        actionBtn("primary mini", "Approve", () => patchPalette(p.id, { status: "approved" })),
+        actionBtn("subtle mini", "Reject", () => patchPalette(p.id, { status: "rejected" })),
+        actionBtn("subtle mini", "Delete", () => deletePalette(p.id))
+      );
+      tr.append(c1, c2, c3);
+      reqBody.appendChild(tr);
+    });
+
+    const rows = $("#palRows");
+    rows.innerHTML = "";
+    active.forEach((p) => {
+      const tr = document.createElement("tr");
+      const c1 = document.createElement("td"); c1.appendChild(swatchRow(p.colors));
+      const c2 = document.createElement("td"); c2.textContent = p.name;
+      const c3 = document.createElement("td"); c3.textContent = p.credit || "—";
+      const c4 = document.createElement("td"); c4.className = "row-actions";
+      c4.append(
+        actionBtn("subtle mini", "Edit", () => startPaletteEdit(p)),
+        actionBtn("subtle mini", "Delete", () => deletePalette(p.id))
+      );
+      tr.append(c1, c2, c3, c4);
+      rows.appendChild(tr);
+    });
+  }
+
+  function paletteFormValues() {
+    return {
+      name: $("#paName").value.trim(),
+      credit: $("#paCredit").value.trim(),
+      colors: [...$("#paSelects").querySelectorAll("select")].map((s) => Number(s.value)),
+    };
+  }
+
+  function startPaletteEdit(p) {
+    palEditingId = p.id;
+    $("#palFormTitle").textContent = `Edit: ${p.name}`;
+    $("#paName").value = p.name;
+    $("#paCredit").value = p.credit || "";
+    [...$("#paSelects").querySelectorAll("select")].forEach((s, i) => {
+      s.value = p.colors[i]; paintSelect(s);
+    });
+    $("#paSave").textContent = "Save changes";
+    $("#paCancel").hidden = false;
+    $("#paName").scrollIntoView({ block: "center" });
+  }
+
+  function resetPaletteForm() {
+    palEditingId = null;
+    $("#palFormTitle").textContent = "Add a palette";
+    $("#paName").value = ""; $("#paCredit").value = ""; $("#paResult").textContent = "";
+    $("#paSave").textContent = "Add palette";
+    $("#paCancel").hidden = true;
+  }
+
+  $("#paCancel").addEventListener("click", resetPaletteForm);
+
+  $("#paSave").addEventListener("click", async () => {
+    const payload = paletteFormValues();
+    $("#paResult").textContent = "Saving…";
+    const res = palEditingId
+      ? await api(`/api/admin/palettes/${palEditingId}`, { method: "PATCH", body: JSON.stringify(payload) })
+      : await api("/api/admin/palettes", { method: "POST", body: JSON.stringify(payload) });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) { resetPaletteForm(); loadPalettes(); }
+    else $("#paResult").textContent = data.error || `Error ${res.status}`;
+  });
+
+  async function patchPalette(id, body) {
+    const res = await api(`/api/admin/palettes/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert(d.error || `Failed: ${res.status}`); }
+    loadPalettes();
+  }
+
+  async function deletePalette(id) {
+    if (!confirm("Delete this palette permanently?")) return;
+    const res = await api(`/api/admin/palettes/${id}`, { method: "DELETE" });
+    if (res.ok) loadPalettes(); else alert(`Failed: ${res.status}`);
+  }
 
   function actionBtn(cls, label, fn) {
     const b = document.createElement("button");
